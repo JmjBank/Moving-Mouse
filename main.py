@@ -13,8 +13,9 @@ DEFAULT_CONFIG_PATH = Path("config.yaml")
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Continuously switch between an existing YouTube browser window and "
-            "Microsoft Teams, performing one safe click in Teams on each cycle."
+            "Monitor Windows user idle time and automate switching between an existing "
+            "YouTube browser window and Microsoft Teams, performing one safe click in "
+            "Teams after each idle threshold is reached."
         )
     )
     parser.add_argument(
@@ -70,6 +71,7 @@ def run_application(config_path: Path) -> int:
     from app.automation import AutomationEngine
     from app.config_loader import load_config, validate_config
     from app.exceptions import ConfigurationError, PlatformNotSupportedError
+    from app.idle_monitor import IdleMonitor
     from app.logger import setup_logging
     from app.window_manager import WindowManager
 
@@ -89,8 +91,16 @@ def run_application(config_path: Path) -> int:
         logger.info("Application stopped.")
         return 0
 
+    if not config["activity_monitor"].get("enabled", True):
+        logger.info(
+            "Activity monitor is disabled in configuration (activity_monitor.enabled=false)."
+        )
+        logger.info("Application stopped.")
+        return 0
+
     try:
         window_manager = WindowManager(config)
+        idle_monitor = IdleMonitor()
     except PlatformNotSupportedError as exc:
         logger.error(str(exc))
         return 1
@@ -98,7 +108,7 @@ def run_application(config_path: Path) -> int:
     engine = AutomationEngine(config, window_manager)
 
     try:
-        engine.run_continuous()
+        engine.run_idle_monitoring(idle_monitor)
     except KeyboardInterrupt:
         logger.info("Stop requested by user.")
         logger.info("Application shutting down gracefully.")

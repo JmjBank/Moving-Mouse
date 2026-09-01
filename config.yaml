@@ -2,8 +2,12 @@ application:
   name: "YouTube Teams Auto Switch"
   enabled: true
 
+activity_monitor:
+  enabled: true
+  idle_threshold_seconds: 180
+  poll_interval_seconds: 1
+
 timing:
-  interval_seconds: 180
   teams_activation_delay_seconds: 2
   after_click_delay_seconds: 1
   startup_delay_seconds: 3
