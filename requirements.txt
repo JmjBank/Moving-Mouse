@@ -1,0 +1,9 @@
+# Windows automation dependencies for YouTube ↔ Microsoft Teams switching.
+#
+# pywin32  - Win32 API for window enumeration, activation, and foreground checks
+# pyautogui - Cross-platform mouse click control at configured screen coordinates
+# PyYAML   - External YAML configuration loading
+
+pywin32>=306; sys_platform == "win32"
+pyautogui>=0.9.54
+PyYAML>=6.0.1
