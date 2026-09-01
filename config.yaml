@@ -1,0 +1,31 @@
+application:
+  name: "YouTube Teams Auto Switch"
+  enabled: true
+
+timing:
+  interval_seconds: 180
+  teams_activation_delay_seconds: 2
+  after_click_delay_seconds: 1
+  startup_delay_seconds: 3
+
+windows:
+  youtube:
+    title_keywords:
+      - "YouTube"
+
+  teams:
+    title_keywords:
+      - "Microsoft Teams"
+      - "Teams"
+
+teams_click:
+  x: 850
+  y: 620
+  button: "left"
+  clicks: 1
+
+logging:
+  level: "INFO"
+  log_to_console: true
+  log_to_file: true
+  file: "logs/app.log"
