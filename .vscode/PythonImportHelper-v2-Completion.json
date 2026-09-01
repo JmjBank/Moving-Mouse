@@ -1,0 +1,99 @@
+[
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "mouse",
+        "importPath": "pynput",
+        "description": "pynput",
+        "isExtraImport": true,
+        "detail": "pynput",
+        "documentation": {}
+    },
+    {
+        "label": "keyboard",
+        "importPath": "pynput",
+        "description": "pynput",
+        "isExtraImport": true,
+        "detail": "pynput",
+        "documentation": {}
+    },
+    {
+        "label": "keep_awake_loop",
+        "kind": 2,
+        "importPath": "keep_awake_mouse",
+        "description": "keep_awake_mouse",
+        "peekOfCode": "def keep_awake_loop():\n    global running, exit_flag\n    while not exit_flag:\n        if running:\n            try:\n                x, y = m.position\n                m.position = (x + 1, y)\n                time.sleep(0.2)\n                m.position = (x, y)\n                print(\"Moved mouse to prevent idle\")",
+        "detail": "keep_awake_mouse",
+        "documentation": {}
+    },
+    {
+        "label": "on_press",
+        "kind": 2,
+        "importPath": "keep_awake_mouse",
+        "description": "keep_awake_mouse",
+        "peekOfCode": "def on_press(key):\n    global running, exit_flag\n    if key == keyboard.Key.f6:\n        running = not running\n        print(\"Started\" if running else \"Stopped\")\n    elif key == keyboard.Key.f7:\n        exit_flag = True\n        print(\"Exiting...\")\n        return False\ndef main():",
+        "detail": "keep_awake_mouse",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "keep_awake_mouse",
+        "description": "keep_awake_mouse",
+        "peekOfCode": "def main():\n    print(\"=== Keep Awake Mouse ===\")\n    print(\"F6 = Start / Stop\")\n    print(\"F7 = Exit\")\n    t = threading.Thread(target=keep_awake_loop)\n    t.daemon = True\n    t.start()\n    with keyboard.Listener(on_press=on_press) as listener:\n        listener.join()\nif __name__ == \"__main__\":",
+        "detail": "keep_awake_mouse",
+        "documentation": {}
+    },
+    {
+        "label": "INTERVAL",
+        "kind": 5,
+        "importPath": "keep_awake_mouse",
+        "description": "keep_awake_mouse",
+        "peekOfCode": "INTERVAL = 60  # ขยับทุก 60 วินาที\nrunning = False\nexit_flag = False\nm = mouse.Controller()\ndef keep_awake_loop():\n    global running, exit_flag\n    while not exit_flag:\n        if running:\n            try:\n                x, y = m.position",
+        "detail": "keep_awake_mouse",
+        "documentation": {}
+    },
+    {
+        "label": "running",
+        "kind": 5,
+        "importPath": "keep_awake_mouse",
+        "description": "keep_awake_mouse",
+        "peekOfCode": "running = False\nexit_flag = False\nm = mouse.Controller()\ndef keep_awake_loop():\n    global running, exit_flag\n    while not exit_flag:\n        if running:\n            try:\n                x, y = m.position\n                m.position = (x + 1, y)",
+        "detail": "keep_awake_mouse",
+        "documentation": {}
+    },
+    {
+        "label": "exit_flag",
+        "kind": 5,
+        "importPath": "keep_awake_mouse",
+        "description": "keep_awake_mouse",
+        "peekOfCode": "exit_flag = False\nm = mouse.Controller()\ndef keep_awake_loop():\n    global running, exit_flag\n    while not exit_flag:\n        if running:\n            try:\n                x, y = m.position\n                m.position = (x + 1, y)\n                time.sleep(0.2)",
+        "detail": "keep_awake_mouse",
+        "documentation": {}
+    },
+    {
+        "label": "m",
+        "kind": 5,
+        "importPath": "keep_awake_mouse",
+        "description": "keep_awake_mouse",
+        "peekOfCode": "m = mouse.Controller()\ndef keep_awake_loop():\n    global running, exit_flag\n    while not exit_flag:\n        if running:\n            try:\n                x, y = m.position\n                m.position = (x + 1, y)\n                time.sleep(0.2)\n                m.position = (x, y)",
+        "detail": "keep_awake_mouse",
+        "documentation": {}
+    }
+]
