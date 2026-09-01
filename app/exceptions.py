@@ -11,3 +11,7 @@ class RecoverableAutomationError(Exception):
 
 class PlatformNotSupportedError(Exception):
     """Raised when required platform APIs are unavailable (fatal at startup)."""
+
+
+class IdleDetectionError(Exception):
+    """Raised when Windows idle time cannot be determined."""

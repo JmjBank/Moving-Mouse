@@ -16,10 +16,14 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "enabled": True,
     },
     "timing": {
-        "interval_seconds": 180,
         "teams_activation_delay_seconds": 2,
         "after_click_delay_seconds": 1,
         "startup_delay_seconds": 3,
+    },
+    "activity_monitor": {
+        "enabled": True,
+        "idle_threshold_seconds": 180,
+        "poll_interval_seconds": 1,
     },
     "windows": {
         "youtube": {
@@ -100,12 +104,6 @@ def validate_config(config: dict[str, Any]) -> None:
     if not isinstance(timing, dict):
         raise ConfigurationError("Invalid configuration: timing must be an object")
 
-    interval_seconds = timing.get("interval_seconds")
-    if not isinstance(interval_seconds, (int, float)) or interval_seconds <= 0:
-        raise ConfigurationError(
-            "Invalid configuration: timing.interval_seconds must be greater than 0"
-        )
-
     for field in (
         "teams_activation_delay_seconds",
         "after_click_delay_seconds",
@@ -116,6 +114,35 @@ def validate_config(config: dict[str, Any]) -> None:
             raise ConfigurationError(
                 f"Invalid configuration: timing.{field} must be greater than or equal to 0"
             )
+
+    activity_monitor = config.get("activity_monitor")
+    if not isinstance(activity_monitor, dict):
+        raise ConfigurationError(
+            "Invalid configuration: activity_monitor must be an object"
+        )
+
+    monitor_enabled = activity_monitor.get("enabled")
+    if not isinstance(monitor_enabled, bool):
+        raise ConfigurationError(
+            "Invalid configuration: activity_monitor.enabled must be a boolean"
+        )
+
+    idle_threshold_seconds = activity_monitor.get("idle_threshold_seconds")
+    if not isinstance(idle_threshold_seconds, (int, float)) or idle_threshold_seconds <= 0:
+        raise ConfigurationError(
+            "Invalid configuration: activity_monitor.idle_threshold_seconds must be greater than 0"
+        )
+
+    poll_interval_seconds = activity_monitor.get("poll_interval_seconds")
+    if not isinstance(poll_interval_seconds, (int, float)) or poll_interval_seconds <= 0:
+        raise ConfigurationError(
+            "Invalid configuration: activity_monitor.poll_interval_seconds must be greater than 0"
+        )
+
+    if poll_interval_seconds >= idle_threshold_seconds:
+        raise ConfigurationError(
+            "Invalid configuration: activity_monitor.poll_interval_seconds must be less than activity_monitor.idle_threshold_seconds"
+        )
 
     windows = config.get("windows")
     if not isinstance(windows, dict):
