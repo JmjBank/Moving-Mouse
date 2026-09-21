@@ -109,3 +109,13 @@ class WindowManager:
             return self._win32gui.GetWindowText(hwnd) or "<untitled>"
         except Exception:
             return "<unknown>"
+
+    def get_window_rect(self, window: WindowInfo) -> tuple[int, int, int, int]:
+        """Return screen coordinates (left, top, right, bottom) for a window."""
+        try:
+            left, top, right, bottom = self._win32gui.GetWindowRect(window.handle)
+            return int(left), int(top), int(right), int(bottom)
+        except Exception as exc:
+            raise RecoverableAutomationError(
+                f"Unable to read window bounds for '{window.title}': {exc}"
+            ) from exc
