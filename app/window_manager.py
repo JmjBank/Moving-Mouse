@@ -17,9 +17,6 @@ logger = logging.getLogger("youtube_teams_automation")
 
 IS_WINDOWS = sys.platform.startswith("win")
 
-VK_MENU = 0x12
-KEYEVENTF_KEYUP = 0x0002
-
 
 @dataclass(frozen=True)
 class WindowInfo:
@@ -107,20 +104,8 @@ class WindowManager:
         except Exception:
             return False
 
-    def window_info_from_handle(self, hwnd: int) -> WindowInfo | None:
-        if not self.is_window_handle_valid(hwnd):
-            return None
-        title = self._win32gui.GetWindowText(hwnd) or "<untitled>"
-        return WindowInfo(handle=hwnd, title=title)
-
-    def activate_window(
-        self,
-        window: WindowInfo,
-        *,
-        minimize_blocking_window: bool = False,
-        gentle: bool = False,
-    ) -> bool:
-        """Bring a window to the foreground without AttachThreadInput (avoids deadlocks)."""
+    def activate_window(self, window: WindowInfo) -> bool:
+        """Bring a window to the foreground using a short, non-blocking Win32 sequence."""
         hwnd = window.handle
         if not self.is_window_handle_valid(hwnd):
             logger.error("Cannot activate destroyed window handle=%s", hwnd)
@@ -128,11 +113,9 @@ class WindowManager:
 
         try:
             self._allow_set_foreground()
-            if minimize_blocking_window and not gentle:
-                self._minimize_foreground_if_different(hwnd)
-
             self._show_window(hwnd)
-            self._force_foreground(hwnd, gentle=gentle)
+            self._win32gui.BringWindowToTop(hwnd)
+            self._win32gui.SetForegroundWindow(hwnd)
             return True
         except Exception as exc:
             logger.error(
@@ -164,33 +147,37 @@ class WindowManager:
         self,
         window: WindowInfo,
         *,
-        attempts: int = 3,
-        delay_seconds: float = 0.25,
-        minimize_blocking_window: bool = False,
-        blocking_window: WindowInfo | None = None,
-        gentle: bool = False,
+        attempts: int = 2,
+        delay_seconds: float = 0.2,
+        deadline: float | None = None,
     ) -> bool:
-        """Activate a window and retry until it becomes foreground or attempts are exhausted."""
-        attempt_count = max(1, int(attempts))
-        delay = max(0.0, float(delay_seconds))
+        """Activate a window with bounded retries (never blocks indefinitely)."""
+        attempt_count = max(1, min(int(attempts), 3))
+        delay = max(0.0, min(float(delay_seconds), 1.0))
 
         for attempt in range(1, attempt_count + 1):
+            if deadline is not None and time.monotonic() >= deadline:
+                logger.warning(
+                    "Window activation timed out for '%s' before attempt %s",
+                    window.title,
+                    attempt,
+                )
+                break
+
             logger.info(
                 "Window activation attempt %s/%s for '%s'",
                 attempt,
                 attempt_count,
                 window.title,
             )
+            self.activate_window(window)
 
-            if blocking_window is not None and attempt == 1:
-                self.minimize_window(blocking_window)
-
-            if self.activate_window(
-                window,
-                minimize_blocking_window=minimize_blocking_window,
-                gentle=gentle,
-            ) and self.is_foreground_window(window):
-                logger.info("Window '%s' is foreground after attempt %s", window.title, attempt)
+            if self.is_foreground_window(window):
+                logger.info(
+                    "Window '%s' is foreground after attempt %s",
+                    window.title,
+                    attempt,
+                )
                 return True
 
             logger.info(
@@ -199,7 +186,13 @@ class WindowManager:
                 self.get_foreground_title(),
             )
             if attempt < attempt_count and delay > 0:
-                time.sleep(delay)
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        break
+                    time.sleep(min(delay, remaining))
+                else:
+                    time.sleep(delay)
 
         return self.is_foreground_window(window)
 
@@ -250,57 +243,11 @@ class WindowManager:
         if not self._user32.SetCursorPos(int(x), int(y)):
             raise OSError(f"SetCursorPos failed for x={x}, y={y}")
 
-    def click_screen_point(self, x: int, y: int) -> None:
-        """Left-click a screen coordinate using Win32 mouse events."""
-        self.move_cursor_to(x, y)
-        self._user32.mouse_event(0x0002, 0, 0, 0, 0)  # LEFTDOWN
-        self._user32.mouse_event(0x0004, 0, 0, 0, 0)  # LEFTUP
-
-    def redraw_window(self, window: WindowInfo) -> None:
-        """Ask Windows to repaint a window (helps GPU video layers after focus changes)."""
-        if not self.is_window_handle_valid(window.handle):
-            return
-
-        redraw_flags = (
-            self._win32con.RDW_INVALIDATE
-            | self._win32con.RDW_UPDATENOW
-            | self._win32con.RDW_ALLCHILDREN
-        )
-        try:
-            self._win32gui.RedrawWindow(window.handle, None, None, redraw_flags)
-        except Exception as exc:
-            logger.debug("RedrawWindow failed for '%s': %s", window.title, exc)
-
     def _show_window(self, hwnd: int) -> None:
         if self._win32gui.IsIconic(hwnd):
             self._win32gui.ShowWindow(hwnd, self._win32con.SW_RESTORE)
         else:
             self._win32gui.ShowWindow(hwnd, self._win32con.SW_SHOW)
-
-    def _minimize_foreground_if_different(self, target_hwnd: int) -> None:
-        foreground_hwnd = self._win32gui.GetForegroundWindow()
-        if not foreground_hwnd or foreground_hwnd == target_hwnd:
-            return
-        if not self.is_window_handle_valid(foreground_hwnd):
-            return
-        try:
-            self._win32gui.ShowWindow(foreground_hwnd, self._win32con.SW_MINIMIZE)
-        except Exception as exc:
-            logger.debug("Could not minimize foreground window: %s", exc)
-
-    def _force_foreground(self, hwnd: int, *, gentle: bool = False) -> None:
-        """Apply Win32 focus workarounds without AttachThreadInput."""
-        self._win32gui.BringWindowToTop(hwnd)
-        if gentle:
-            self._win32gui.SetForegroundWindow(hwnd)
-            return
-
-        self._user32.keybd_event(VK_MENU, 0, 0, 0)
-        try:
-            self._win32gui.SetForegroundWindow(hwnd)
-            self._user32.SwitchToThisWindow(hwnd, True)
-        finally:
-            self._user32.keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0)
 
     def _allow_set_foreground(self) -> None:
         try:

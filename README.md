@@ -95,15 +95,14 @@ flowchart TD
 | `activity_monitor.poll_interval_seconds` | ความถี่ตรวจ idle |
 | `timing.teams_activation_delay_seconds` | รอหลังเปิด Teams |
 | `timing.after_click_delay_seconds` | รอหลังคลิกก่อนกลับ YouTube |
-| `timing.youtube_activation_attempts` | จำนวนครั้งที่ลองสลับกลับ YouTube |
+| `timing.youtube_activation_attempts` | จำนวนครั้งที่ลองสลับกลับ YouTube (สูงสุด 3 ในโค้ด) |
 | `timing.youtube_activation_retry_delay_seconds` | หน่วงระหว่างแต่ละครั้งที่ลอง activate YouTube |
-| `timing.youtube_activation_delay_seconds` | รอหลัง YouTube ขึ้น foreground ก่อนย้ายเมาส์ |
+| `timing.youtube_activation_delay_seconds` | รอสั้นๆ ก่อนย้ายเมาส์ |
+| `timing.youtube_restore_timeout_seconds` | จำกัดเวลา restore ทั้งชุด (กันโปรแกรมค้าง) |
+| `windows.youtube.restore_minimize_teams` | ย่อ Teams ก่อนกลับ (ค่าเริ่มต้น `false`) |
 | `teams_click.x` / `y` | พิกัดคลิกบนหน้าจอ |
 | `youtube_cursor.enabled` | เปิด/ปิดการสุ่มตำแหน่งเมาส์หลังกลับ YouTube |
 | `youtube_cursor.margin_pixels` | ระยะห่างจากขอบหน้าต่าง YouTube (พิกเซล) |
-| `youtube_cursor.wake_display_after_restore` | repaint + เลื่อนเมาส์ไปบริเวณวิดีโอ (แก้จอดำหลังสลับหน้าต่าง) |
-| `youtube_cursor.wake_click` | คลิกเพิ่มหลัง wake (อาจ pause วิดีโอ — เปิดเมื่อจอดำยังไม่หาย) |
-| `youtube_cursor.wake_vertical_ratio` | ตำแหน่งแนวตั้งของจุด wake (0.58 ≈ กลางภาพในเบราว์เซอร์) |
 
 ## ทดสอบ
 
@@ -127,8 +126,9 @@ python -m unittest discover -s tests -v
 5. รันโปรแกรมจากเทอร์มินัลใน session ที่ล็อกอินอยู่ (ไม่ใช่ Task Scheduler session แยก)
 6. ถ้ายังไม่กลับ ลองเพิ่ม `timing.youtube_activation_attempts` เป็น `8`
 
-## แก้ปัญหา: กลับ YouTube แล้วจอดำ
+## แก้ปัญหา: โปรแกรมค้าง / จอดำหลังกลับ YouTube
 
-1. ค่าเริ่มต้น `youtube_cursor.wake_display_after_restore: true` จะ **RedrawWindow** และเลื่อนเมาส์ไปบริเวณวิดีโอ (ไม่คลิก)
-2. การสลับกลับ YouTube ใช้โหมด **gentle** (ไม่ `SwitchToThisWindow` / ไม่ minimize หน้าต่าง foreground ซ้ำ) เพื่อลดจอดำจาก GPU/Hardware acceleration
-3. ถ้ายังดำ ลอง `youtube_cursor.wake_click: true` (อาจหยุดชั่วคราวถ้าคลิกโดนปุ่ม play — ใช้เมื่อจำเป็น)
+1. โค้ดล่าสุด **ไม่ใช้** `RedrawWindow`, `SwitchToThisWindow`, หรือ `AttachThreadInput` (มักทำให้ค้างกับ Chrome/Teams)
+2. ขั้น restore มี **timeout** (`youtube_restore_timeout_seconds`, ค่าเริ่มต้น 6 วินาที) แล้วจบเสมอด้วย log `YouTube restore sequence finished`
+3. ถ้าสลับกลับไม่ได้ ลอง `windows.youtube.restore_minimize_teams: true`
+4. ถ้ากลับได้แต่จอดำ ลองเลื่อนเมาส์เองหนึ่งครั้ง หรือกด `k` ในหน้า YouTube (ขึ้นกับเบราว์เซอร์)

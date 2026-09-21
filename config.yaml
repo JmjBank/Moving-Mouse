@@ -11,17 +11,22 @@ timing:
   teams_activation_delay_seconds: 2
   after_click_delay_seconds: 1
   startup_delay_seconds: 3
-  youtube_activation_attempts: 5
-  youtube_activation_retry_delay_seconds: 0.35
-  youtube_activation_delay_seconds: 0.5
+  youtube_activation_attempts: 2
+  youtube_activation_retry_delay_seconds: 0.2
+  youtube_activation_delay_seconds: 0.3
+  youtube_restore_timeout_seconds: 6.0
 
 windows:
   youtube:
     title_keywords:
       - "YouTube"
+<<<<<<< HEAD
       - "YouTube - Google Chrome"
       - "Chrome"
     restore_minimize_teams: true
+=======
+    restore_minimize_teams: false
+>>>>>>> fddd04a (Simplify window restore to prevent system-wide hangs)
 
   teams:
     title_keywords:
@@ -37,9 +42,7 @@ teams_click:
 youtube_cursor:
   enabled: true
   margin_pixels: 80
-  wake_display_after_restore: true
-  wake_click: false
-  wake_vertical_ratio: 0.58
+  wake_display_after_restore: false
 
 logging:
   level: "INFO"

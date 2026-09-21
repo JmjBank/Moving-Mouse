@@ -19,9 +19,10 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "teams_activation_delay_seconds": 2,
         "after_click_delay_seconds": 1,
         "startup_delay_seconds": 3,
-        "youtube_activation_attempts": 5,
-        "youtube_activation_retry_delay_seconds": 0.35,
-        "youtube_activation_delay_seconds": 0.5,
+        "youtube_activation_attempts": 2,
+        "youtube_activation_retry_delay_seconds": 0.2,
+        "youtube_activation_delay_seconds": 0.3,
+        "youtube_restore_timeout_seconds": 6.0,
     },
     "activity_monitor": {
         "enabled": True,
@@ -31,7 +32,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "windows": {
         "youtube": {
             "title_keywords": ["YouTube"],
-            "restore_minimize_teams": True,
+            "restore_minimize_teams": False,
         },
         "teams": {
             "title_keywords": ["Microsoft Teams", "Teams"],
@@ -46,9 +47,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "youtube_cursor": {
         "enabled": True,
         "margin_pixels": 80,
-        "wake_display_after_restore": True,
-        "wake_click": False,
-        "wake_vertical_ratio": 0.58,
+        "wake_display_after_restore": False,
     },
     "logging": {
         "level": "INFO",
@@ -121,6 +120,7 @@ def validate_config(config: dict[str, Any]) -> None:
         "startup_delay_seconds",
         "youtube_activation_retry_delay_seconds",
         "youtube_activation_delay_seconds",
+        "youtube_restore_timeout_seconds",
     ):
         value = timing.get(field)
         if not isinstance(value, (int, float)) or value < 0:
@@ -231,19 +231,4 @@ def validate_config(config: dict[str, Any]) -> None:
         if wake_display is not None and not isinstance(wake_display, bool):
             raise ConfigurationError(
                 "Invalid configuration: youtube_cursor.wake_display_after_restore must be a boolean"
-            )
-
-        wake_click = youtube_cursor.get("wake_click")
-        if wake_click is not None and not isinstance(wake_click, bool):
-            raise ConfigurationError(
-                "Invalid configuration: youtube_cursor.wake_click must be a boolean"
-            )
-
-        wake_vertical_ratio = youtube_cursor.get("wake_vertical_ratio")
-        if wake_vertical_ratio is not None and (
-            not isinstance(wake_vertical_ratio, (int, float))
-            or not 0.0 <= float(wake_vertical_ratio) <= 1.0
-        ):
-            raise ConfigurationError(
-                "Invalid configuration: youtube_cursor.wake_vertical_ratio must be between 0 and 1"
             )
