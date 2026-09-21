@@ -9,7 +9,7 @@ from typing import Any
 
 from app.exceptions import IdleDetectionError, RecoverableAutomationError
 from app.idle_monitor import IdleAutomationState, IdleMonitor
-from app.mouse_position import center_point_in_rectangle, random_point_in_rectangle
+from app.mouse_position import random_point_in_rectangle
 from app.window_manager import WindowInfo, WindowManager
 
 logger = logging.getLogger("youtube_teams_automation")
@@ -253,77 +253,43 @@ class AutomationEngine:
         timing = self._config.get("timing") or {}
         windows_config = self._config.get("windows") or {}
         youtube_config = windows_config.get("youtube") or {}
-        attempts = int(timing.get("youtube_activation_attempts", 5))
-        retry_delay = float(timing.get("youtube_activation_retry_delay_seconds", 0.35))
-        settle_delay = float(timing.get("youtube_activation_delay_seconds", 0.5))
-        minimize_teams = bool(youtube_config.get("restore_minimize_teams", True))
-
-        logger.info("Switching back to YouTube: '%s'", target_window.title)
-
-        blocking_window = teams_window if minimize_teams else None
-        activated = self._window_manager.activate_window_with_retries(
-            target_window,
-            attempts=attempts,
-            delay_seconds=retry_delay,
-            minimize_blocking_window=False,
-            blocking_window=blocking_window,
-            gentle=True,
-        )
-        if not activated:
-            logger.warning(
-                "YouTube window could not be brought to the foreground after %s attempt(s). "
-                "Foreground is still '%s'.",
-                attempts,
-                self._window_manager.get_foreground_title(),
-            )
-            return
-
-        if settle_delay > 0:
-            self._interruptible_sleep(settle_delay)
-
-        self._wake_youtube_display(target_window)
-        self._reposition_mouse_on_youtube(target_window)
-
-    def _wake_youtube_display(self, youtube_window: WindowInfo) -> None:
-        """Repaint and nudge the browser so YouTube video does not stay black after restore."""
-        cursor_config = self._config.get("youtube_cursor") or {}
-        if not cursor_config.get("wake_display_after_restore", True):
-            return
-
-        self._window_manager.redraw_window(youtube_window)
-
-        try:
-            rect = self._window_manager.get_window_rect(youtube_window)
-        except RecoverableAutomationError as exc:
-            logger.warning("Skipping YouTube display wake: %s", exc)
-            return
-
-        vertical_ratio = float(cursor_config.get("wake_vertical_ratio", 0.58))
-        wake_x, wake_y = center_point_in_rectangle(
-            rect,
-            vertical_ratio=vertical_ratio,
-        )
-
-        try:
-            self._window_manager.move_cursor_to(wake_x, wake_y)
-        except Exception as exc:
-            logger.warning("YouTube display wake (mouse move) failed: %s", exc)
-            return
-
-        if cursor_config.get("wake_click", False):
-            try:
-                self._window_manager.click_screen_point(wake_x, wake_y)
-            except Exception as exc:
-                logger.warning("YouTube display wake (click) failed: %s", exc)
-                return
+        attempts = int(timing.get("youtube_activation_attempts", 2))
+        retry_delay = float(timing.get("youtube_activation_retry_delay_seconds", 0.2))
+        settle_delay = float(timing.get("youtube_activation_delay_seconds", 0.3))
+        restore_timeout = float(timing.get("youtube_restore_timeout_seconds", 6.0))
+        minimize_teams = bool(youtube_config.get("restore_minimize_teams", False))
+        deadline = time.monotonic() + max(1.0, restore_timeout)
 
         logger.info(
-            "YouTube display wake at x=%s, y=%s (redraw=%s, click=%s)",
-            wake_x,
-            wake_y,
-            True,
-            bool(cursor_config.get("wake_click", False)),
+            "Switching back to YouTube: '%s' (timeout %.1fs)",
+            target_window.title,
+            restore_timeout,
         )
+
+        try:
+            if minimize_teams and teams_window is not None:
+                self._window_manager.minimize_window(teams_window)
+
+            activated = self._window_manager.activate_window_with_retries(
+                target_window,
+                attempts=attempts,
+                delay_seconds=retry_delay,
+                deadline=deadline,
+            )
+            if not activated:
+                logger.warning(
+                    "YouTube may not be foreground after restore (current: '%s'). "
+                    "Continuing without blocking.",
+                    self._window_manager.get_foreground_title(),
+                )
+
+            remaining = deadline - time.monotonic()
+            if settle_delay > 0 and remaining > 0:
+                self._interruptible_sleep(min(settle_delay, remaining))
+
+            self._reposition_mouse_on_youtube(target_window)
+        finally:
+            logger.info("YouTube restore sequence finished")
 
     def _reposition_mouse_on_youtube(self, youtube_window: WindowInfo) -> None:
         """Move the cursor to a random point inside the YouTube window (optional)."""
