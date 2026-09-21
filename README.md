@@ -115,9 +115,11 @@ python -m unittest discover -s tests -v
 - ใช้ `pyautogui` สำหรับคลิกและย้ายเมาส์ — อย่าเลื่อนเมาส์ไปมุมซ้ายบนสุดของจอขณะรัน (PyAutoGUI failsafe)
 - การย้ายเมาส์ด้วยโปรแกรมมัก **ไม่** นับเป็น user input ใน `GetLastInputInfo` แต่การคลิกหรือพิมพ์ของผู้ใช้จะรีเซ็ตช่วง idle ตามปกติ
 
-## แก้ปัญหา: เปิด Teams แล้วไม่กลับ YouTube
+## แก้ปัญหา: เปิด Teams แล้วไม่กลับ YouTube / ค้าง
 
-1. ดู log ว่ามี `YouTube window not found` หรือไม่ — ชื่อแท็บเบราว์เซอร์ต้องมีคำใน `windows.youtube.title_keywords` (เช่น `YouTube` หรือชื่อเบราว์เซอร์)
-2. เพิ่ม `timing.youtube_activation_attempts` เป็น `5` ถ้า Windows ชะลอการสลับหน้าต่าง
-3. รันโปรแกรมจากเทอร์มินัลที่ผู้ใช้ล็อกอินอยู่ (ไม่ใช่ session แยก) เพื่อให้ `SetForegroundWindow` ทำงานได้ดีขึ้น
-4. หลังเปิด Teams แอปจะ **กลับ YouTube ใน `finally` เสมอ** แม้คลิกล้มเหลวหรือยกเลิกรอบ — ถ้ายังไม่กลับ มักเป็นเพราะหา/activate หน้าต่าง YouTube ไม่สำเร็จ
+1. ดู `logs/app.log` หลัง `Starting YouTube restore sequence` — จะมี attempt 1..N และชื่อ foreground ปัจจุบัน
+2. ชื่อแท็บเบราว์เซอร์ต้องมีคำใน `windows.youtube.title_keywords` (เช่น `YouTube`, `Chrome`, `Edge`)
+3. ค่าเริ่มต้น `windows.youtube.restore_minimize_teams: true` จะ **ย่อ Teams** ก่อนดึง YouTube กลับ (ช่วยเมื่อ Windows ไม่ให้ขโมยโฟกัส)
+4. ก่อนสลับไป Teams แอปจะ **จำหน้าต่าง YouTube ที่เป็น foreground** อยู่แล้ว เพื่อใช้ handle เดิมตอนกลับ (ไม่พึ่งค้นหาชื่อใหม่เพียงอย่างเดียว)
+5. รันโปรแกรมจากเทอร์มินัลใน session ที่ล็อกอินอยู่ (ไม่ใช่ Task Scheduler session แยก)
+6. ถ้ายังไม่กลับ ลองเพิ่ม `timing.youtube_activation_attempts` เป็น `8`

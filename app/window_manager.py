@@ -17,6 +17,9 @@ logger = logging.getLogger("youtube_teams_automation")
 
 IS_WINDOWS = sys.platform.startswith("win")
 
+VK_MENU = 0x12
+KEYEVENTF_KEYUP = 0x0002
+
 
 @dataclass(frozen=True)
 class WindowInfo:
@@ -76,31 +79,59 @@ class WindowManager:
 
         return choose_best_scored_item(scored_matches)
 
-    def activate_window(self, window: WindowInfo) -> bool:
-        """Bring a window to the foreground with Win32 focus workarounds."""
+    def resolve_youtube_window(self, keywords: Sequence[str]) -> WindowInfo | None:
+        """
+        Prefer the current foreground window when it already looks like YouTube.
+
+        This captures the browser the user was watching before automation switches away.
+        """
+        try:
+            foreground_hwnd = self._win32gui.GetForegroundWindow()
+        except Exception:
+            foreground_hwnd = 0
+
+        if foreground_hwnd and self.is_window_handle_valid(foreground_hwnd):
+            title = self._win32gui.GetWindowText(foreground_hwnd) or ""
+            if score_title_for_keywords(title, keywords) > 0:
+                logger.info(
+                    "Using current foreground window as YouTube target: '%s'",
+                    title,
+                )
+                return WindowInfo(handle=foreground_hwnd, title=title)
+
+        return self.find_window_by_keywords(keywords)
+
+    def is_window_handle_valid(self, hwnd: int) -> bool:
+        try:
+            return bool(hwnd) and bool(self._win32gui.IsWindow(hwnd))
+        except Exception:
+            return False
+
+    def window_info_from_handle(self, hwnd: int) -> WindowInfo | None:
+        if not self.is_window_handle_valid(hwnd):
+            return None
+        title = self._win32gui.GetWindowText(hwnd) or "<untitled>"
+        return WindowInfo(handle=hwnd, title=title)
+
+    def activate_window(
+        self,
+        window: WindowInfo,
+        *,
+        minimize_blocking_window: bool = False,
+    ) -> bool:
+        """Bring a window to the foreground without AttachThreadInput (avoids deadlocks)."""
         hwnd = window.handle
+        if not self.is_window_handle_valid(hwnd):
+            logger.error("Cannot activate destroyed window handle=%s", hwnd)
+            return False
+
         try:
             self._allow_set_foreground()
+            if minimize_blocking_window:
+                self._minimize_foreground_if_different(hwnd)
+
             self._show_window(hwnd)
-
-            foreground_hwnd = self._win32gui.GetForegroundWindow()
-            foreground_thread = self._window_thread_id(foreground_hwnd)
-            target_thread = self._window_thread_id(hwnd)
-            attached = False
-
-            if foreground_thread and target_thread and foreground_thread != target_thread:
-                self._user32.AttachThreadInput(foreground_thread, target_thread, True)
-                attached = True
-
-            try:
-                self._win32gui.SetForegroundWindow(hwnd)
-                self._win32gui.BringWindowToTop(hwnd)
-            finally:
-                if attached:
-                    self._user32.AttachThreadInput(
-                        foreground_thread, target_thread, False
-                    )
-
+            self._force_foreground(hwnd)
             return True
         except Exception as exc:
             logger.error(
@@ -111,40 +142,63 @@ class WindowManager:
             )
             return False
 
+    def minimize_window(self, window: WindowInfo) -> bool:
+        """Minimize a top-level window."""
+        if not self.is_window_handle_valid(window.handle):
+            return False
+
+        try:
+            self._win32gui.ShowWindow(window.handle, self._win32con.SW_MINIMIZE)
+            return True
+        except Exception as exc:
+            logger.warning(
+                "Failed to minimize window '%s' (handle=%s): %s",
+                window.title,
+                window.handle,
+                exc,
+            )
+            return False
+
     def activate_window_with_retries(
         self,
         window: WindowInfo,
         *,
         attempts: int = 3,
         delay_seconds: float = 0.25,
+        minimize_blocking_window: bool = False,
+        blocking_window: WindowInfo | None = None,
     ) -> bool:
         """Activate a window and retry until it becomes foreground or attempts are exhausted."""
         attempt_count = max(1, int(attempts))
         delay = max(0.0, float(delay_seconds))
-        activation_succeeded = False
 
         for attempt in range(1, attempt_count + 1):
-            if self.activate_window(window):
-                activation_succeeded = True
-                if self.is_foreground_window(window):
-                    return True
+            logger.info(
+                "Window activation attempt %s/%s for '%s'",
+                attempt,
+                attempt_count,
+                window.title,
+            )
 
-                logger.debug(
-                    "Window '%s' activation attempt %s did not reach foreground yet",
-                    window.title,
-                    attempt,
-                )
-            elif attempt < attempt_count:
-                logger.debug(
-                    "Window '%s' activation attempt %s failed",
-                    window.title,
-                    attempt,
-                )
+            if blocking_window is not None and attempt == 1:
+                self.minimize_window(blocking_window)
 
+            if self.activate_window(
+                window,
+                minimize_blocking_window=minimize_blocking_window,
+            ) and self.is_foreground_window(window):
+                logger.info("Window '%s' is foreground after attempt %s", window.title, attempt)
+                return True
+
+            logger.info(
+                "Window '%s' is not foreground yet (current: '%s')",
+                window.title,
+                self.get_foreground_title(),
+            )
             if attempt < attempt_count and delay > 0:
                 time.sleep(delay)
 
-        return activation_succeeded
+        return self.is_foreground_window(window)
 
     def is_foreground_window(self, window: WindowInfo) -> bool:
         """Return True when the given window (or its root) owns the foreground."""
@@ -188,29 +242,49 @@ class WindowManager:
                 f"Unable to read window bounds for '{window.title}': {exc}"
             ) from exc
 
+    def move_cursor_to(self, x: int, y: int) -> None:
+        """Move the mouse cursor using Win32 SetCursorPos (non-blocking)."""
+        if not self._user32.SetCursorPos(int(x), int(y)):
+            raise OSError(f"SetCursorPos failed for x={x}, y={y}")
+
     def _show_window(self, hwnd: int) -> None:
         if self._win32gui.IsIconic(hwnd):
             self._win32gui.ShowWindow(hwnd, self._win32con.SW_RESTORE)
         else:
             self._win32gui.ShowWindow(hwnd, self._win32con.SW_SHOW)
 
+    def _minimize_foreground_if_different(self, target_hwnd: int) -> None:
+        foreground_hwnd = self._win32gui.GetForegroundWindow()
+        if not foreground_hwnd or foreground_hwnd == target_hwnd:
+            return
+        if not self.is_window_handle_valid(foreground_hwnd):
+            return
+        try:
+            self._win32gui.ShowWindow(foreground_hwnd, self._win32con.SW_MINIMIZE)
+        except Exception as exc:
+            logger.debug("Could not minimize foreground window: %s", exc)
+
+    def _force_foreground(self, hwnd: int) -> None:
+        """Apply common Win32 focus workarounds without AttachThreadInput."""
+        self._user32.keybd_event(VK_MENU, 0, 0, 0)
+        try:
+            self._win32gui.BringWindowToTop(hwnd)
+            self._win32gui.SetForegroundWindow(hwnd)
+            self._user32.SwitchToThisWindow(hwnd, True)
+        finally:
+            self._user32.keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0)
+
     def _allow_set_foreground(self) -> None:
         try:
             current_process_id = int(ctypes.windll.kernel32.GetCurrentProcessId())
             self._user32.AllowSetForegroundWindow(wintypes.DWORD(current_process_id))
         except Exception:
-            # Best-effort; focus activation still attempts AttachThreadInput below.
             pass
 
     def _root_window_handle(self, hwnd: int) -> int:
         if not hwnd:
             return 0
         return int(self._win32gui.GetAncestor(hwnd, self._win32con.GA_ROOT))
-
-    def _window_thread_id(self, hwnd: int) -> int:
-        if not hwnd:
-            return 0
-        return int(self._win32process.GetWindowThreadProcessId(hwnd)[0])
 
     def _window_process_id(self, hwnd: int) -> int:
         if not hwnd:

@@ -19,7 +19,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "teams_activation_delay_seconds": 2,
         "after_click_delay_seconds": 1,
         "startup_delay_seconds": 3,
-        "youtube_activation_attempts": 3,
+        "youtube_activation_attempts": 5,
         "youtube_activation_retry_delay_seconds": 0.35,
         "youtube_activation_delay_seconds": 0.5,
     },
@@ -31,6 +31,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "windows": {
         "youtube": {
             "title_keywords": ["YouTube"],
+            "restore_minimize_teams": True,
         },
         "teams": {
             "title_keywords": ["Microsoft Teams", "Teams"],
