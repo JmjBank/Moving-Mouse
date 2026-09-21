@@ -9,7 +9,7 @@ from typing import Any
 
 from app.exceptions import IdleDetectionError, RecoverableAutomationError
 from app.idle_monitor import IdleAutomationState, IdleMonitor
-from app.mouse_position import random_point_in_rectangle
+from app.mouse_position import center_point_in_rectangle, random_point_in_rectangle
 from app.window_manager import WindowInfo, WindowManager
 
 logger = logging.getLogger("youtube_teams_automation")
@@ -121,6 +121,13 @@ class AutomationEngine:
         timing = self._config["timing"]
         teams_click = self._config["teams_click"]
 
+        youtube_window = self._window_manager.resolve_youtube_window(youtube_keywords)
+        if youtube_window is None:
+            logger.warning(
+                "YouTube window not found before automation cycle. "
+                "Restore after Teams may fail; check windows.youtube.title_keywords."
+            )
+
         teams_window = self._window_manager.find_window_by_keywords(teams_keywords)
         if teams_window is None:
             logger.warning(
@@ -196,7 +203,11 @@ class AutomationEngine:
             return CycleResult.COMPLETED
         finally:
             if teams_session_active:
-                self._switch_back_to_youtube(youtube_keywords)
+                self._switch_back_to_youtube(
+                    youtube_keywords,
+                    youtube_window=youtube_window,
+                    teams_window=teams_window,
+                )
 
     def _user_activity_detected_during_preparation(
         self,
@@ -213,10 +224,26 @@ class AutomationEngine:
 
         return idle_state.has_user_activity_since_automation_started(current_input_tick)
 
-    def _switch_back_to_youtube(self, youtube_keywords: list[str]) -> None:
+    def _switch_back_to_youtube(
+        self,
+        youtube_keywords: list[str],
+        *,
+        youtube_window: WindowInfo | None = None,
+        teams_window: WindowInfo | None = None,
+    ) -> None:
         """Activate the existing YouTube window when available."""
-        youtube_window = self._window_manager.find_window_by_keywords(youtube_keywords)
-        if youtube_window is None:
+        logger.info("Starting YouTube restore sequence")
+
+        target_window = youtube_window
+        if target_window is not None and not self._window_manager.is_window_handle_valid(
+            target_window.handle
+        ):
+            target_window = None
+
+        if target_window is None:
+            target_window = self._window_manager.find_window_by_keywords(youtube_keywords)
+
+        if target_window is None:
             logger.warning(
                 "YouTube window not found. Unable to restore YouTube automatically. "
                 "Check windows.youtube.title_keywords (browser tab title must contain a keyword)."
@@ -224,27 +251,79 @@ class AutomationEngine:
             return
 
         timing = self._config.get("timing") or {}
-        attempts = int(timing.get("youtube_activation_attempts", 3))
+        windows_config = self._config.get("windows") or {}
+        youtube_config = windows_config.get("youtube") or {}
+        attempts = int(timing.get("youtube_activation_attempts", 5))
         retry_delay = float(timing.get("youtube_activation_retry_delay_seconds", 0.35))
         settle_delay = float(timing.get("youtube_activation_delay_seconds", 0.5))
+        minimize_teams = bool(youtube_config.get("restore_minimize_teams", True))
 
-        logger.info("Switching back to YouTube: '%s'", youtube_window.title)
+        logger.info("Switching back to YouTube: '%s'", target_window.title)
+
+        blocking_window = teams_window if minimize_teams else None
         activated = self._window_manager.activate_window_with_retries(
-            youtube_window,
+            target_window,
             attempts=attempts,
             delay_seconds=retry_delay,
+            minimize_blocking_window=False,
+            blocking_window=blocking_window,
+            gentle=True,
         )
         if not activated:
             logger.warning(
-                "YouTube window could not be brought to the foreground after %s attempt(s).",
+                "YouTube window could not be brought to the foreground after %s attempt(s). "
+                "Foreground is still '%s'.",
                 attempts,
+                self._window_manager.get_foreground_title(),
             )
             return
 
         if settle_delay > 0:
             self._interruptible_sleep(settle_delay)
 
-        self._reposition_mouse_on_youtube(youtube_window)
+        self._wake_youtube_display(target_window)
+        self._reposition_mouse_on_youtube(target_window)
+
+    def _wake_youtube_display(self, youtube_window: WindowInfo) -> None:
+        """Repaint and nudge the browser so YouTube video does not stay black after restore."""
+        cursor_config = self._config.get("youtube_cursor") or {}
+        if not cursor_config.get("wake_display_after_restore", True):
+            return
+
+        self._window_manager.redraw_window(youtube_window)
+
+        try:
+            rect = self._window_manager.get_window_rect(youtube_window)
+        except RecoverableAutomationError as exc:
+            logger.warning("Skipping YouTube display wake: %s", exc)
+            return
+
+        vertical_ratio = float(cursor_config.get("wake_vertical_ratio", 0.58))
+        wake_x, wake_y = center_point_in_rectangle(
+            rect,
+            vertical_ratio=vertical_ratio,
+        )
+
+        try:
+            self._window_manager.move_cursor_to(wake_x, wake_y)
+        except Exception as exc:
+            logger.warning("YouTube display wake (mouse move) failed: %s", exc)
+            return
+
+        if cursor_config.get("wake_click", False):
+            try:
+                self._window_manager.click_screen_point(wake_x, wake_y)
+            except Exception as exc:
+                logger.warning("YouTube display wake (click) failed: %s", exc)
+                return
+
+        logger.info(
+            "YouTube display wake at x=%s, y=%s (redraw=%s, click=%s)",
+            wake_x,
+            wake_y,
+            True,
+            bool(cursor_config.get("wake_click", False)),
+        )
 
     def _reposition_mouse_on_youtube(self, youtube_window: WindowInfo) -> None:
         """Move the cursor to a random point inside the YouTube window (optional)."""
@@ -271,11 +350,7 @@ class AutomationEngine:
 
         move_x, move_y = point
         try:
-            import pyautogui
-
-            pyautogui.FAILSAFE = True
-            pyautogui.PAUSE = 0
-            pyautogui.moveTo(move_x, move_y)
+            self._window_manager.move_cursor_to(move_x, move_y)
         except Exception as exc:
             logger.warning("YouTube cursor reposition failed: %s", exc)
             return

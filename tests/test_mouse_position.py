@@ -5,7 +5,7 @@ from __future__ import annotations
 import random
 import unittest
 
-from app.mouse_position import random_point_in_rectangle
+from app.mouse_position import center_point_in_rectangle, random_point_in_rectangle
 
 
 class RandomPointInRectangleTests(unittest.TestCase):
@@ -26,6 +26,11 @@ class RandomPointInRectangleTests(unittest.TestCase):
     def test_returns_none_when_window_too_small(self) -> None:
         rect = (0, 0, 100, 100)
         self.assertIsNone(random_point_in_rectangle(rect, 80))
+
+    def test_center_point_uses_vertical_ratio(self) -> None:
+        x, y = center_point_in_rectangle((0, 0, 100, 100), vertical_ratio=0.58)
+        self.assertEqual(x, 50)
+        self.assertEqual(y, 57)
 
     def test_zero_margin_uses_full_rect(self) -> None:
         rng = random.Random(1)
