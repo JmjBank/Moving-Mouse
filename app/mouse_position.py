@@ -38,3 +38,24 @@ def random_point_in_rectangle(
     x = randomizer.randint(inner_left, max_x)
     y = randomizer.randint(inner_top, max_y)
     return x, y
+
+
+def center_point_in_rectangle(
+    rect: Sequence[int],
+    *,
+    vertical_ratio: float = 0.58,
+) -> tuple[int, int]:
+    """
+    Return a point near the visual center of a browser window.
+
+    ``vertical_ratio`` shifts below the geometric center to avoid the tab/toolbar
+    area (0.5 = dead center, ~0.58 ≈ typical video region in Chrome/Edge).
+    """
+    if len(rect) != 4:
+        raise ValueError("rect must contain exactly four integers")
+
+    left, top, right, bottom = (int(value) for value in rect)
+    ratio = min(max(float(vertical_ratio), 0.0), 1.0)
+    x = left + (right - left) // 2
+    y = top + int((bottom - top) * ratio)
+    return x, y
