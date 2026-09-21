@@ -19,6 +19,9 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "teams_activation_delay_seconds": 2,
         "after_click_delay_seconds": 1,
         "startup_delay_seconds": 3,
+        "youtube_activation_attempts": 3,
+        "youtube_activation_retry_delay_seconds": 0.35,
+        "youtube_activation_delay_seconds": 0.5,
     },
     "activity_monitor": {
         "enabled": True,
@@ -112,12 +115,20 @@ def validate_config(config: dict[str, Any]) -> None:
         "teams_activation_delay_seconds",
         "after_click_delay_seconds",
         "startup_delay_seconds",
+        "youtube_activation_retry_delay_seconds",
+        "youtube_activation_delay_seconds",
     ):
         value = timing.get(field)
         if not isinstance(value, (int, float)) or value < 0:
             raise ConfigurationError(
                 f"Invalid configuration: timing.{field} must be greater than or equal to 0"
             )
+
+    youtube_activation_attempts = timing.get("youtube_activation_attempts")
+    if not isinstance(youtube_activation_attempts, int) or youtube_activation_attempts < 1:
+        raise ConfigurationError(
+            "Invalid configuration: timing.youtube_activation_attempts must be an integer >= 1"
+        )
 
     activity_monitor = config.get("activity_monitor")
     if not isinstance(activity_monitor, dict):

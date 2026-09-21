@@ -132,69 +132,71 @@ class AutomationEngine:
         logger.info("Microsoft Teams window found: '%s'", teams_window.title)
         logger.info("Switching to Microsoft Teams")
 
-        if not self._window_manager.activate_window(teams_window):
-            logger.error("Unable to activate Microsoft Teams. Click cancelled.")
-            self._switch_back_to_youtube(youtube_keywords)
-            return CycleResult.SKIPPED
-
-        activation_delay = float(timing["teams_activation_delay_seconds"])
-        if activation_delay > 0:
-            self._interruptible_sleep(activation_delay)
-
-        if self._user_activity_detected_during_preparation(idle_monitor, idle_state):
-            logger.info(
-                "User activity detected during automation preparation. "
-                "Current click cancelled."
-            )
-            self._switch_back_to_youtube(youtube_keywords)
-            return CycleResult.CANCELLED
-
-        if not self._window_manager.is_foreground_window(teams_window):
-            foreground_title = self._window_manager.get_foreground_title()
-            logger.error(
-                "Microsoft Teams foreground verification failed. Click cancelled. "
-                "Current foreground: '%s'",
-                foreground_title,
-            )
-            self._switch_back_to_youtube(youtube_keywords)
-            return CycleResult.SKIPPED
-
-        logger.info("Microsoft Teams verified as foreground")
-
-        if self._user_activity_detected_during_preparation(idle_monitor, idle_state):
-            logger.info(
-                "User activity detected during automation preparation. "
-                "Current click cancelled."
-            )
-            self._switch_back_to_youtube(youtube_keywords)
-            return CycleResult.CANCELLED
-
-        click_x = int(teams_click["x"])
-        click_y = int(teams_click["y"])
-        button = str(teams_click.get("button", "left"))
-
+        teams_session_active = False
         try:
-            import pyautogui
+            if not self._window_manager.activate_window(teams_window):
+                logger.error("Unable to activate Microsoft Teams. Click cancelled.")
+                return CycleResult.SKIPPED
 
-            pyautogui.FAILSAFE = True
-            pyautogui.PAUSE = 0
-            pyautogui.click(
-                x=click_x,
-                y=click_y,
-                clicks=1,
-                button=button,
-            )
-            logger.info("Mouse click executed at x=%s, y=%s", click_x, click_y)
-        except Exception as exc:
-            raise RecoverableAutomationError(f"Mouse click failed: {exc}") from exc
+            teams_session_active = True
 
-        after_click_delay = float(timing["after_click_delay_seconds"])
-        if after_click_delay > 0:
-            self._interruptible_sleep(after_click_delay)
+            activation_delay = float(timing["teams_activation_delay_seconds"])
+            if activation_delay > 0:
+                self._interruptible_sleep(activation_delay)
 
-        self._switch_back_to_youtube(youtube_keywords)
-        logger.info("Automation cycle #%s completed", cycle_number)
-        return CycleResult.COMPLETED
+            if self._user_activity_detected_during_preparation(idle_monitor, idle_state):
+                logger.info(
+                    "User activity detected during automation preparation. "
+                    "Current click cancelled."
+                )
+                return CycleResult.CANCELLED
+
+            if not self._window_manager.is_foreground_window(teams_window):
+                foreground_title = self._window_manager.get_foreground_title()
+                logger.error(
+                    "Microsoft Teams foreground verification failed. Click cancelled. "
+                    "Current foreground: '%s'",
+                    foreground_title,
+                )
+                return CycleResult.SKIPPED
+
+            logger.info("Microsoft Teams verified as foreground")
+
+            if self._user_activity_detected_during_preparation(idle_monitor, idle_state):
+                logger.info(
+                    "User activity detected during automation preparation. "
+                    "Current click cancelled."
+                )
+                return CycleResult.CANCELLED
+
+            click_x = int(teams_click["x"])
+            click_y = int(teams_click["y"])
+            button = str(teams_click.get("button", "left"))
+
+            try:
+                import pyautogui
+
+                pyautogui.FAILSAFE = True
+                pyautogui.PAUSE = 0
+                pyautogui.click(
+                    x=click_x,
+                    y=click_y,
+                    clicks=1,
+                    button=button,
+                )
+                logger.info("Mouse click executed at x=%s, y=%s", click_x, click_y)
+            except Exception as exc:
+                raise RecoverableAutomationError(f"Mouse click failed: {exc}") from exc
+
+            after_click_delay = float(timing["after_click_delay_seconds"])
+            if after_click_delay > 0:
+                self._interruptible_sleep(after_click_delay)
+
+            logger.info("Automation cycle #%s completed", cycle_number)
+            return CycleResult.COMPLETED
+        finally:
+            if teams_session_active:
+                self._switch_back_to_youtube(youtube_keywords)
 
     def _user_activity_detected_during_preparation(
         self,
@@ -216,14 +218,31 @@ class AutomationEngine:
         youtube_window = self._window_manager.find_window_by_keywords(youtube_keywords)
         if youtube_window is None:
             logger.warning(
-                "YouTube window not found. Unable to restore YouTube automatically."
+                "YouTube window not found. Unable to restore YouTube automatically. "
+                "Check windows.youtube.title_keywords (browser tab title must contain a keyword)."
             )
             return
 
+        timing = self._config.get("timing") or {}
+        attempts = int(timing.get("youtube_activation_attempts", 3))
+        retry_delay = float(timing.get("youtube_activation_retry_delay_seconds", 0.35))
+        settle_delay = float(timing.get("youtube_activation_delay_seconds", 0.5))
+
         logger.info("Switching back to YouTube: '%s'", youtube_window.title)
-        if not self._window_manager.activate_window(youtube_window):
-            logger.warning("YouTube window could not be activated.")
+        activated = self._window_manager.activate_window_with_retries(
+            youtube_window,
+            attempts=attempts,
+            delay_seconds=retry_delay,
+        )
+        if not activated:
+            logger.warning(
+                "YouTube window could not be brought to the foreground after %s attempt(s).",
+                attempts,
+            )
             return
+
+        if settle_delay > 0:
+            self._interruptible_sleep(settle_delay)
 
         self._reposition_mouse_on_youtube(youtube_window)
 

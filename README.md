@@ -95,6 +95,9 @@ flowchart TD
 | `activity_monitor.poll_interval_seconds` | ความถี่ตรวจ idle |
 | `timing.teams_activation_delay_seconds` | รอหลังเปิด Teams |
 | `timing.after_click_delay_seconds` | รอหลังคลิกก่อนกลับ YouTube |
+| `timing.youtube_activation_attempts` | จำนวนครั้งที่ลองสลับกลับ YouTube |
+| `timing.youtube_activation_retry_delay_seconds` | หน่วงระหว่างแต่ละครั้งที่ลอง activate YouTube |
+| `timing.youtube_activation_delay_seconds` | รอหลัง YouTube ขึ้น foreground ก่อนย้ายเมาส์ |
 | `teams_click.x` / `y` | พิกัดคลิกบนหน้าจอ |
 | `youtube_cursor.enabled` | เปิด/ปิดการสุ่มตำแหน่งเมาส์หลังกลับ YouTube |
 | `youtube_cursor.margin_pixels` | ระยะห่างจากขอบหน้าต่าง YouTube (พิกเซล) |
@@ -111,3 +114,10 @@ python -m unittest discover -s tests -v
 
 - ใช้ `pyautogui` สำหรับคลิกและย้ายเมาส์ — อย่าเลื่อนเมาส์ไปมุมซ้ายบนสุดของจอขณะรัน (PyAutoGUI failsafe)
 - การย้ายเมาส์ด้วยโปรแกรมมัก **ไม่** นับเป็น user input ใน `GetLastInputInfo` แต่การคลิกหรือพิมพ์ของผู้ใช้จะรีเซ็ตช่วง idle ตามปกติ
+
+## แก้ปัญหา: เปิด Teams แล้วไม่กลับ YouTube
+
+1. ดู log ว่ามี `YouTube window not found` หรือไม่ — ชื่อแท็บเบราว์เซอร์ต้องมีคำใน `windows.youtube.title_keywords` (เช่น `YouTube` หรือชื่อเบราว์เซอร์)
+2. เพิ่ม `timing.youtube_activation_attempts` เป็น `5` ถ้า Windows ชะลอการสลับหน้าต่าง
+3. รันโปรแกรมจากเทอร์มินัลที่ผู้ใช้ล็อกอินอยู่ (ไม่ใช่ session แยก) เพื่อให้ `SetForegroundWindow` ทำงานได้ดีขึ้น
+4. หลังเปิด Teams แอปจะ **กลับ YouTube ใน `finally` เสมอ** แม้คลิกล้มเหลวหรือยกเลิกรอบ — ถ้ายังไม่กลับ มักเป็นเพราะหา/activate หน้าต่าง YouTube ไม่สำเร็จ
