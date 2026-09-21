@@ -282,6 +282,14 @@
         "documentation": {}
     },
     {
+        "label": "center_point_in_rectangle",
+        "importPath": "app.mouse_position",
+        "description": "app.mouse_position",
+        "isExtraImport": true,
+        "detail": "app.mouse_position",
+        "documentation": {}
+    },
+    {
         "label": "random_point_in_rectangle",
         "importPath": "app.mouse_position",
         "description": "app.mouse_position",
@@ -647,6 +655,15 @@
         "importPath": "app.mouse_position",
         "description": "app.mouse_position",
         "peekOfCode": "def random_point_in_rectangle(\n    rect: Sequence[int],\n    margin_pixels: int,\n    *,\n    rng: random.Random | None = None,\n) -> tuple[int, int] | None:\n    \"\"\"\n    Pick a random screen coordinate inside ``rect`` with ``margin_pixels`` inset.\n    ``rect`` is ``(left, top, right, bottom)`` in screen coordinates as returned by\n    ``GetWindowRect``. Returns ``None`` when the inset region is too small.",
+        "detail": "app.mouse_position",
+        "documentation": {}
+    },
+    {
+        "label": "center_point_in_rectangle",
+        "kind": 2,
+        "importPath": "app.mouse_position",
+        "description": "app.mouse_position",
+        "peekOfCode": "def center_point_in_rectangle(\n    rect: Sequence[int],\n    *,\n    vertical_ratio: float = 0.58,\n) -> tuple[int, int]:\n    \"\"\"\n    Return a point near the visual center of a browser window.\n    ``vertical_ratio`` shifts below the geometric center to avoid the tab/toolbar\n    area (0.5 = dead center, ~0.58 ≈ typical video region in Chrome/Edge).\n    \"\"\"",
         "detail": "app.mouse_position",
         "documentation": {}
     },

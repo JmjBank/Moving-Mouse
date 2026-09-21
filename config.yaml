@@ -20,13 +20,9 @@ windows:
   youtube:
     title_keywords:
       - "YouTube"
-<<<<<<< HEAD
       - "YouTube - Google Chrome"
       - "Chrome"
-    restore_minimize_teams: true
-=======
     restore_minimize_teams: false
->>>>>>> fddd04a (Simplify window restore to prevent system-wide hangs)
 
   teams:
     title_keywords:
