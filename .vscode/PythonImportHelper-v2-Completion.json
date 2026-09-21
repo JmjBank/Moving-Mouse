@@ -1,11 +1,475 @@
 [
     {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
         "label": "time",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "time",
         "description": "time",
         "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Sequence",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Sequence",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Sequence",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "TypeVar",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "IdleDetectionError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "RecoverableAutomationError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "ConfigurationError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "IdleDetectionError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "PlatformNotSupportedError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "PlatformNotSupportedError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "RecoverableAutomationError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "ConfigurationError",
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "isExtraImport": true,
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "IdleAutomationState",
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "isExtraImport": true,
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "IdleMonitor",
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "isExtraImport": true,
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "IdleAutomationState",
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "isExtraImport": true,
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "random_point_in_rectangle",
+        "importPath": "app.mouse_position",
+        "description": "app.mouse_position",
+        "isExtraImport": true,
+        "detail": "app.mouse_position",
+        "documentation": {}
+    },
+    {
+        "label": "random_point_in_rectangle",
+        "importPath": "app.mouse_position",
+        "description": "app.mouse_position",
+        "isExtraImport": true,
+        "detail": "app.mouse_position",
+        "documentation": {}
+    },
+    {
+        "label": "WindowInfo",
+        "importPath": "app.window_manager",
+        "description": "app.window_manager",
+        "isExtraImport": true,
+        "detail": "app.window_manager",
+        "documentation": {}
+    },
+    {
+        "label": "WindowManager",
+        "importPath": "app.window_manager",
+        "description": "app.window_manager",
+        "isExtraImport": true,
+        "detail": "app.window_manager",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "yaml",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "yaml",
+        "description": "yaml",
+        "detail": "yaml",
+        "documentation": {}
+    },
+    {
+        "label": "ctypes",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "ctypes",
+        "description": "ctypes",
+        "detail": "ctypes",
+        "documentation": {}
+    },
+    {
+        "label": "wintypes",
+        "importPath": "ctypes",
+        "description": "ctypes",
+        "isExtraImport": true,
+        "detail": "ctypes",
+        "documentation": {}
+    },
+    {
+        "label": "wintypes",
+        "importPath": "ctypes",
+        "description": "ctypes",
+        "isExtraImport": true,
+        "detail": "ctypes",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "choose_best_scored_item",
+        "importPath": "app.window_selection",
+        "description": "app.window_selection",
+        "isExtraImport": true,
+        "detail": "app.window_selection",
+        "documentation": {}
+    },
+    {
+        "label": "score_title_for_keywords",
+        "importPath": "app.window_selection",
+        "description": "app.window_selection",
+        "isExtraImport": true,
+        "detail": "app.window_selection",
+        "documentation": {}
+    },
+    {
+        "label": "choose_best_scored_item",
+        "importPath": "app.window_selection",
+        "description": "app.window_selection",
+        "isExtraImport": true,
+        "detail": "app.window_selection",
+        "documentation": {}
+    },
+    {
+        "label": "score_title_for_keywords",
+        "importPath": "app.window_selection",
+        "description": "app.window_selection",
+        "isExtraImport": true,
+        "detail": "app.window_selection",
+        "documentation": {}
+    },
+    {
+        "label": "tempfile",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tempfile",
+        "description": "tempfile",
+        "detail": "tempfile",
+        "documentation": {}
+    },
+    {
+        "label": "unittest",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "unittest",
+        "description": "unittest",
+        "detail": "unittest",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "importPath": "app.config_loader",
+        "description": "app.config_loader",
+        "isExtraImport": true,
+        "detail": "app.config_loader",
+        "documentation": {}
+    },
+    {
+        "label": "validate_config",
+        "importPath": "app.config_loader",
+        "description": "app.config_loader",
+        "isExtraImport": true,
+        "detail": "app.config_loader",
         "documentation": {}
     },
     {
@@ -31,6 +495,267 @@
         "description": "pynput",
         "isExtraImport": true,
         "detail": "pynput",
+        "documentation": {}
+    },
+    {
+        "label": "argparse",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "argparse",
+        "description": "argparse",
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "CycleResult",
+        "kind": 6,
+        "importPath": "app.automation",
+        "description": "app.automation",
+        "peekOfCode": "class CycleResult(Enum):\n    COMPLETED = \"completed\"\n    SKIPPED = \"skipped\"\n    CANCELLED = \"cancelled\"\nclass AutomationEngine:\n    \"\"\"Runs idle monitoring and single automation cycles.\"\"\"\n    def __init__(self, config: dict[str, Any], window_manager: WindowManager) -> None:\n        self._config = config\n        self._window_manager = window_manager\n        self._cycle_count = 0",
+        "detail": "app.automation",
+        "documentation": {}
+    },
+    {
+        "label": "AutomationEngine",
+        "kind": 6,
+        "importPath": "app.automation",
+        "description": "app.automation",
+        "peekOfCode": "class AutomationEngine:\n    \"\"\"Runs idle monitoring and single automation cycles.\"\"\"\n    def __init__(self, config: dict[str, Any], window_manager: WindowManager) -> None:\n        self._config = config\n        self._window_manager = window_manager\n        self._cycle_count = 0\n    def run_idle_monitoring(self, idle_monitor: IdleMonitor) -> None:\n        \"\"\"Monitor user idle time and trigger automation cycles until interrupted.\"\"\"\n        activity_config = self._config[\"activity_monitor\"]\n        timing = self._config[\"timing\"]",
+        "detail": "app.automation",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "app.automation",
+        "description": "app.automation",
+        "peekOfCode": "logger = logging.getLogger(\"youtube_teams_automation\")\nclass CycleResult(Enum):\n    COMPLETED = \"completed\"\n    SKIPPED = \"skipped\"\n    CANCELLED = \"cancelled\"\nclass AutomationEngine:\n    \"\"\"Runs idle monitoring and single automation cycles.\"\"\"\n    def __init__(self, config: dict[str, Any], window_manager: WindowManager) -> None:\n        self._config = config\n        self._window_manager = window_manager",
+        "detail": "app.automation",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "kind": 2,
+        "importPath": "app.config_loader",
+        "description": "app.config_loader",
+        "peekOfCode": "def load_config(config_path: str | Path) -> dict[str, Any]:\n    \"\"\"Load YAML or JSON configuration and merge with safe defaults.\"\"\"\n    path = Path(config_path)\n    if not path.exists():\n        raise ConfigurationError(f\"Configuration file not found: {path}\")\n    raw_text = path.read_text(encoding=\"utf-8\")\n    suffix = path.suffix.lower()\n    if suffix in {\".yaml\", \".yml\"}:\n        loaded = yaml.safe_load(raw_text)\n    elif suffix == \".json\":",
+        "detail": "app.config_loader",
+        "documentation": {}
+    },
+    {
+        "label": "validate_config",
+        "kind": 2,
+        "importPath": "app.config_loader",
+        "description": "app.config_loader",
+        "peekOfCode": "def validate_config(config: dict[str, Any]) -> None:\n    \"\"\"Validate configuration values. Raises ConfigurationError on failure.\"\"\"\n    application = config.get(\"application\")\n    if not isinstance(application, dict):\n        raise ConfigurationError(\"Invalid configuration: application must be an object\")\n    enabled = application.get(\"enabled\")\n    if not isinstance(enabled, bool):\n        raise ConfigurationError(\n            \"Invalid configuration: application.enabled must be a boolean\"\n        )",
+        "detail": "app.config_loader",
+        "documentation": {}
+    },
+    {
+        "label": "ConfigurationError",
+        "kind": 6,
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "peekOfCode": "class ConfigurationError(Exception):\n    \"\"\"Raised when configuration is invalid at startup (fatal).\"\"\"\nclass RecoverableAutomationError(Exception):\n    \"\"\"Raised for unexpected but recoverable errors during a single cycle.\"\"\"\nclass PlatformNotSupportedError(Exception):\n    \"\"\"Raised when required platform APIs are unavailable (fatal at startup).\"\"\"\nclass IdleDetectionError(Exception):\n    \"\"\"Raised when Windows idle time cannot be determined.\"\"\"",
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "RecoverableAutomationError",
+        "kind": 6,
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "peekOfCode": "class RecoverableAutomationError(Exception):\n    \"\"\"Raised for unexpected but recoverable errors during a single cycle.\"\"\"\nclass PlatformNotSupportedError(Exception):\n    \"\"\"Raised when required platform APIs are unavailable (fatal at startup).\"\"\"\nclass IdleDetectionError(Exception):\n    \"\"\"Raised when Windows idle time cannot be determined.\"\"\"",
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "PlatformNotSupportedError",
+        "kind": 6,
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "peekOfCode": "class PlatformNotSupportedError(Exception):\n    \"\"\"Raised when required platform APIs are unavailable (fatal at startup).\"\"\"\nclass IdleDetectionError(Exception):\n    \"\"\"Raised when Windows idle time cannot be determined.\"\"\"",
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "IdleDetectionError",
+        "kind": 6,
+        "importPath": "app.exceptions",
+        "description": "app.exceptions",
+        "peekOfCode": "class IdleDetectionError(Exception):\n    \"\"\"Raised when Windows idle time cannot be determined.\"\"\"",
+        "detail": "app.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "LASTINPUTINFO",
+        "kind": 6,
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "peekOfCode": "class LASTINPUTINFO(ctypes.Structure):\n    _fields_ = [\n        (\"cbSize\", wintypes.UINT),\n        (\"dwTime\", wintypes.DWORD),\n    ]\nclass IdleMonitor:\n    \"\"\"Provides user idle duration using the native Windows GetLastInputInfo API.\"\"\"\n    def __init__(self) -> None:\n        if not IS_WINDOWS:\n            raise PlatformNotSupportedError(",
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "IdleMonitor",
+        "kind": 6,
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "peekOfCode": "class IdleMonitor:\n    \"\"\"Provides user idle duration using the native Windows GetLastInputInfo API.\"\"\"\n    def __init__(self) -> None:\n        if not IS_WINDOWS:\n            raise PlatformNotSupportedError(\n                \"User idle monitoring is only supported on Microsoft Windows.\"\n            )\n        self._user32 = ctypes.windll.user32\n        self._kernel32 = ctypes.windll.kernel32\n        self._last_input_info = LASTINPUTINFO()",
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "IdleAutomationState",
+        "kind": 6,
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "peekOfCode": "class IdleAutomationState:\n    \"\"\"Tracks idle-period automation trigger state independent of Windows idle time.\"\"\"\n    def __init__(self) -> None:\n        self.automation_in_progress = False\n        self.automation_triggered_for_current_idle_period = False\n        self._post_automation_input_tick: int | None = None\n        self._automation_start_input_tick: int | None = None\n        self._previous_input_tick: int | None = None\n    def initialize(self, input_tick: int) -> None:\n        \"\"\"Seed state with the current Windows last-input tick.\"\"\"",
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "peekOfCode": "logger = logging.getLogger(\"youtube_teams_automation\")\nIS_WINDOWS = sys.platform == \"win32\"\nclass LASTINPUTINFO(ctypes.Structure):\n    _fields_ = [\n        (\"cbSize\", wintypes.UINT),\n        (\"dwTime\", wintypes.DWORD),\n    ]\nclass IdleMonitor:\n    \"\"\"Provides user idle duration using the native Windows GetLastInputInfo API.\"\"\"\n    def __init__(self) -> None:",
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "IS_WINDOWS",
+        "kind": 5,
+        "importPath": "app.idle_monitor",
+        "description": "app.idle_monitor",
+        "peekOfCode": "IS_WINDOWS = sys.platform == \"win32\"\nclass LASTINPUTINFO(ctypes.Structure):\n    _fields_ = [\n        (\"cbSize\", wintypes.UINT),\n        (\"dwTime\", wintypes.DWORD),\n    ]\nclass IdleMonitor:\n    \"\"\"Provides user idle duration using the native Windows GetLastInputInfo API.\"\"\"\n    def __init__(self) -> None:\n        if not IS_WINDOWS:",
+        "detail": "app.idle_monitor",
+        "documentation": {}
+    },
+    {
+        "label": "setup_logging",
+        "kind": 2,
+        "importPath": "app.logger",
+        "description": "app.logger",
+        "peekOfCode": "def setup_logging(config: dict[str, Any]) -> logging.Logger:\n    \"\"\"Configure application logging from the ``logging`` config section.\"\"\"\n    logging_config = config.get(\"logging\", {})\n    level_name = str(logging_config.get(\"level\", \"INFO\")).upper()\n    level = getattr(logging, level_name, logging.INFO)\n    log_format = \"%(asctime)s %(levelname)s %(message)s\"\n    date_format = \"%Y-%m-%d %H:%M:%S\"\n    logger = logging.getLogger(\"youtube_teams_automation\")\n    logger.setLevel(level)\n    logger.handlers.clear()",
+        "detail": "app.logger",
+        "documentation": {}
+    },
+    {
+        "label": "random_point_in_rectangle",
+        "kind": 2,
+        "importPath": "app.mouse_position",
+        "description": "app.mouse_position",
+        "peekOfCode": "def random_point_in_rectangle(\n    rect: Sequence[int],\n    margin_pixels: int,\n    *,\n    rng: random.Random | None = None,\n) -> tuple[int, int] | None:\n    \"\"\"\n    Pick a random screen coordinate inside ``rect`` with ``margin_pixels`` inset.\n    ``rect`` is ``(left, top, right, bottom)`` in screen coordinates as returned by\n    ``GetWindowRect``. Returns ``None`` when the inset region is too small.",
+        "detail": "app.mouse_position",
+        "documentation": {}
+    },
+    {
+        "label": "WindowInfo",
+        "kind": 6,
+        "importPath": "app.window_manager",
+        "description": "app.window_manager",
+        "peekOfCode": "class WindowInfo:\n    \"\"\"Represents a located top-level window.\"\"\"\n    handle: int\n    title: str\nclass WindowManager:\n    \"\"\"Find and control existing application windows.\"\"\"\n    def __init__(self, config: dict[str, Any]) -> None:\n        self._config = config\n        if not IS_WINDOWS:\n            raise PlatformNotSupportedError(",
+        "detail": "app.window_manager",
+        "documentation": {}
+    },
+    {
+        "label": "WindowManager",
+        "kind": 6,
+        "importPath": "app.window_manager",
+        "description": "app.window_manager",
+        "peekOfCode": "class WindowManager:\n    \"\"\"Find and control existing application windows.\"\"\"\n    def __init__(self, config: dict[str, Any]) -> None:\n        self._config = config\n        if not IS_WINDOWS:\n            raise PlatformNotSupportedError(\n                \"Window automation is only supported on Microsoft Windows. \"\n                \"Open YouTube and Microsoft Teams on Windows before running this application.\"\n            )\n        import win32con  # type: ignore[import-untyped]",
+        "detail": "app.window_manager",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "app.window_manager",
+        "description": "app.window_manager",
+        "peekOfCode": "logger = logging.getLogger(\"youtube_teams_automation\")\nIS_WINDOWS = sys.platform.startswith(\"win\")\n@dataclass(frozen=True)\nclass WindowInfo:\n    \"\"\"Represents a located top-level window.\"\"\"\n    handle: int\n    title: str\nclass WindowManager:\n    \"\"\"Find and control existing application windows.\"\"\"\n    def __init__(self, config: dict[str, Any]) -> None:",
+        "detail": "app.window_manager",
+        "documentation": {}
+    },
+    {
+        "label": "IS_WINDOWS",
+        "kind": 5,
+        "importPath": "app.window_manager",
+        "description": "app.window_manager",
+        "peekOfCode": "IS_WINDOWS = sys.platform.startswith(\"win\")\n@dataclass(frozen=True)\nclass WindowInfo:\n    \"\"\"Represents a located top-level window.\"\"\"\n    handle: int\n    title: str\nclass WindowManager:\n    \"\"\"Find and control existing application windows.\"\"\"\n    def __init__(self, config: dict[str, Any]) -> None:\n        self._config = config",
+        "detail": "app.window_manager",
+        "documentation": {}
+    },
+    {
+        "label": "score_title_for_keywords",
+        "kind": 2,
+        "importPath": "app.window_selection",
+        "description": "app.window_selection",
+        "peekOfCode": "def score_title_for_keywords(title: str, keywords: Sequence[str]) -> int:\n    \"\"\"Return the length of the longest keyword contained in ``title``.\"\"\"\n    title_lower = title.lower()\n    best = 0\n    for keyword in keywords:\n        normalized = keyword.lower()\n        if normalized and normalized in title_lower:\n            best = max(best, len(normalized))\n    return best\ndef choose_best_scored_item(",
+        "detail": "app.window_selection",
+        "documentation": {}
+    },
+    {
+        "label": "choose_best_scored_item",
+        "kind": 2,
+        "importPath": "app.window_selection",
+        "description": "app.window_selection",
+        "peekOfCode": "def choose_best_scored_item(\n    items: Sequence[tuple[int, T]],\n) -> T | None:\n    \"\"\"Pick the item with the highest score; stable on ties (first wins).\"\"\"\n    if not items:\n        return None\n    best_score = max(score for score, _ in items)\n    for score, item in items:\n        if score == best_score:\n            return item",
+        "detail": "app.window_selection",
+        "documentation": {}
+    },
+    {
+        "label": "T",
+        "kind": 5,
+        "importPath": "app.window_selection",
+        "description": "app.window_selection",
+        "peekOfCode": "T = TypeVar(\"T\")\ndef score_title_for_keywords(title: str, keywords: Sequence[str]) -> int:\n    \"\"\"Return the length of the longest keyword contained in ``title``.\"\"\"\n    title_lower = title.lower()\n    best = 0\n    for keyword in keywords:\n        normalized = keyword.lower()\n        if normalized and normalized in title_lower:\n            best = max(best, len(normalized))\n    return best",
+        "detail": "app.window_selection",
+        "documentation": {}
+    },
+    {
+        "label": "ConfigValidationTests",
+        "kind": 6,
+        "importPath": "tests.test_config_loader",
+        "description": "tests.test_config_loader",
+        "peekOfCode": "class ConfigValidationTests(unittest.TestCase):\n    def test_default_config_is_valid(self) -> None:\n        config = load_config(Path(\"config.yaml\"))\n        validate_config(config)\n        self.assertEqual(config[\"activity_monitor\"][\"idle_threshold_seconds\"], 180)\n        self.assertEqual(config[\"teams_click\"][\"clicks\"], 1)\n    def test_invalid_idle_threshold(self) -> None:\n        with tempfile.NamedTemporaryFile(\"w\", suffix=\".yaml\", delete=False) as handle:\n            handle.write(\n                BASE_CONFIG.replace(\"idle_threshold_seconds: 180\", \"idle_threshold_seconds: 0\")",
+        "detail": "tests.test_config_loader",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_CONFIG",
+        "kind": 5,
+        "importPath": "tests.test_config_loader",
+        "description": "tests.test_config_loader",
+        "peekOfCode": "BASE_CONFIG = \"\"\"\nactivity_monitor:\n  enabled: true\n  idle_threshold_seconds: 180\n  poll_interval_seconds: 1\ntiming:\n  teams_activation_delay_seconds: 2\n  after_click_delay_seconds: 1\nwindows:\n  youtube:",
+        "detail": "tests.test_config_loader",
+        "documentation": {}
+    },
+    {
+        "label": "IdleAutomationStateTests",
+        "kind": 6,
+        "importPath": "tests.test_idle_state",
+        "description": "tests.test_idle_state",
+        "peekOfCode": "class IdleAutomationStateTests(unittest.TestCase):\n    def setUp(self) -> None:\n        self.state = IdleAutomationState()\n        self.state.initialize(1000)\n    def test_does_not_trigger_while_idle_period_already_processed(self) -> None:\n        self.state.on_automation_started(1000)\n        self.state.on_automation_completed(1000)\n        self.assertTrue(self.state.automation_triggered_for_current_idle_period)\n        self.assertFalse(self.state.should_trigger_automation(300.0, 180.0))\n    def test_user_activity_after_automation_resets_idle_period(self) -> None:",
+        "detail": "tests.test_idle_state",
+        "documentation": {}
+    },
+    {
+        "label": "RandomPointInRectangleTests",
+        "kind": 6,
+        "importPath": "tests.test_mouse_position",
+        "description": "tests.test_mouse_position",
+        "peekOfCode": "class RandomPointInRectangleTests(unittest.TestCase):\n    def test_point_stays_inside_margin(self) -> None:\n        rng = random.Random(0)\n        rect = (100, 200, 500, 600)\n        margin = 50\n        for _ in range(20):\n            point = random_point_in_rectangle(rect, margin, rng=rng)\n            self.assertIsNotNone(point)\n            x, y = point\n            self.assertGreaterEqual(x, 150)",
+        "detail": "tests.test_mouse_position",
+        "documentation": {}
+    },
+    {
+        "label": "WindowSelectionTests",
+        "kind": 6,
+        "importPath": "tests.test_window_selection",
+        "description": "tests.test_window_selection",
+        "peekOfCode": "class WindowSelectionTests(unittest.TestCase):\n    def test_prefers_longer_keyword_match(self) -> None:\n        score = score_title_for_keywords(\n            \"Chat | Microsoft Teams\",\n            [\"Microsoft Teams\", \"Teams\"],\n        )\n        self.assertEqual(score, len(\"microsoft teams\"))\n    def test_choose_best_scored_item_returns_highest_score(self) -> None:\n        chosen = choose_best_scored_item(\n            [",
+        "detail": "tests.test_window_selection",
         "documentation": {}
     },
     {
@@ -94,6 +819,60 @@
         "description": "keep_awake_mouse",
         "peekOfCode": "m = mouse.Controller()\ndef keep_awake_loop():\n    global running, exit_flag\n    while not exit_flag:\n        if running:\n            try:\n                x, y = m.position\n                m.position = (x + 1, y)\n                time.sleep(0.2)\n                m.position = (x, y)",
         "detail": "keep_awake_mouse",
+        "documentation": {}
+    },
+    {
+        "label": "parse_args",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def parse_args() -> argparse.Namespace:\n    parser = argparse.ArgumentParser(\n        description=(\n            \"Monitor Windows user idle time and automate switching between an existing \"\n            \"YouTube browser window and Microsoft Teams, performing one safe click in \"\n            \"Teams after each idle threshold is reached.\"\n        )\n    )\n    parser.add_argument(\n        \"--config\",",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "get_mouse_position",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def get_mouse_position() -> tuple[int, int]:\n    \"\"\"Return current cursor coordinates using the best available platform API.\"\"\"\n    if sys.platform == \"win32\":\n        import ctypes\n        class POINT(ctypes.Structure):\n            _fields_ = [(\"x\", ctypes.c_long), (\"y\", ctypes.c_long)]\n        point = POINT()\n        if not ctypes.windll.user32.GetCursorPos(ctypes.byref(point)):\n            raise OSError(\"GetCursorPos failed\")\n        return point.x, point.y",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "show_mouse_position",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def show_mouse_position() -> int:\n    try:\n        x, y = get_mouse_position()\n    except Exception as exc:\n        print(f\"ERROR: Could not read mouse position: {exc}\", file=sys.stderr)\n        return 1\n    print(f\"Current mouse position: X={x} Y={y}\")\n    return 0\ndef run_application(config_path: Path) -> int:\n    from app.automation import AutomationEngine",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "run_application",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def run_application(config_path: Path) -> int:\n    from app.automation import AutomationEngine\n    from app.config_loader import load_config, validate_config\n    from app.exceptions import ConfigurationError, PlatformNotSupportedError\n    from app.idle_monitor import IdleMonitor\n    from app.logger import setup_logging\n    from app.window_manager import WindowManager\n    try:\n        config = load_config(config_path)\n        validate_config(config)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def main() -> int:\n    args = parse_args()\n    if args.show_mouse_position:\n        return show_mouse_position()\n    return run_application(Path(args.config))\nif __name__ == \"__main__\":\n    sys.exit(main())",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_CONFIG_PATH",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "DEFAULT_CONFIG_PATH = Path(\"config.yaml\")\ndef parse_args() -> argparse.Namespace:\n    parser = argparse.ArgumentParser(\n        description=(\n            \"Monitor Windows user idle time and automate switching between an existing \"\n            \"YouTube browser window and Microsoft Teams, performing one safe click in \"\n            \"Teams after each idle threshold is reached.\"\n        )\n    )\n    parser.add_argument(",
+        "detail": "main",
         "documentation": {}
     }
 ]

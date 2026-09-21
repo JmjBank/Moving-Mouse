@@ -19,6 +19,8 @@ windows:
   youtube:
     title_keywords:
       - "YouTube"
+      - "YouTube - Google Chrome"
+      - "Chrome"
 
   teams:
     title_keywords:
