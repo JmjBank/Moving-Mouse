@@ -46,6 +46,9 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "youtube_cursor": {
         "enabled": True,
         "margin_pixels": 80,
+        "wake_display_after_restore": True,
+        "wake_click": False,
+        "wake_vertical_ratio": 0.58,
     },
     "logging": {
         "level": "INFO",
@@ -222,4 +225,25 @@ def validate_config(config: dict[str, Any]) -> None:
         if not isinstance(margin_pixels, int) or margin_pixels < 0:
             raise ConfigurationError(
                 "Invalid configuration: youtube_cursor.margin_pixels must be an integer >= 0"
+            )
+
+        wake_display = youtube_cursor.get("wake_display_after_restore")
+        if wake_display is not None and not isinstance(wake_display, bool):
+            raise ConfigurationError(
+                "Invalid configuration: youtube_cursor.wake_display_after_restore must be a boolean"
+            )
+
+        wake_click = youtube_cursor.get("wake_click")
+        if wake_click is not None and not isinstance(wake_click, bool):
+            raise ConfigurationError(
+                "Invalid configuration: youtube_cursor.wake_click must be a boolean"
+            )
+
+        wake_vertical_ratio = youtube_cursor.get("wake_vertical_ratio")
+        if wake_vertical_ratio is not None and (
+            not isinstance(wake_vertical_ratio, (int, float))
+            or not 0.0 <= float(wake_vertical_ratio) <= 1.0
+        ):
+            raise ConfigurationError(
+                "Invalid configuration: youtube_cursor.wake_vertical_ratio must be between 0 and 1"
             )

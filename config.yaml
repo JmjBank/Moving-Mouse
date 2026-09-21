@@ -35,6 +35,9 @@ teams_click:
 youtube_cursor:
   enabled: true
   margin_pixels: 80
+  wake_display_after_restore: true
+  wake_click: false
+  wake_vertical_ratio: 0.58
 
 logging:
   level: "INFO"

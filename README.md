@@ -101,6 +101,9 @@ flowchart TD
 | `teams_click.x` / `y` | พิกัดคลิกบนหน้าจอ |
 | `youtube_cursor.enabled` | เปิด/ปิดการสุ่มตำแหน่งเมาส์หลังกลับ YouTube |
 | `youtube_cursor.margin_pixels` | ระยะห่างจากขอบหน้าต่าง YouTube (พิกเซล) |
+| `youtube_cursor.wake_display_after_restore` | repaint + เลื่อนเมาส์ไปบริเวณวิดีโอ (แก้จอดำหลังสลับหน้าต่าง) |
+| `youtube_cursor.wake_click` | คลิกเพิ่มหลัง wake (อาจ pause วิดีโอ — เปิดเมื่อจอดำยังไม่หาย) |
+| `youtube_cursor.wake_vertical_ratio` | ตำแหน่งแนวตั้งของจุด wake (0.58 ≈ กลางภาพในเบราว์เซอร์) |
 
 ## ทดสอบ
 
@@ -123,3 +126,9 @@ python -m unittest discover -s tests -v
 4. ก่อนสลับไป Teams แอปจะ **จำหน้าต่าง YouTube ที่เป็น foreground** อยู่แล้ว เพื่อใช้ handle เดิมตอนกลับ (ไม่พึ่งค้นหาชื่อใหม่เพียงอย่างเดียว)
 5. รันโปรแกรมจากเทอร์มินัลใน session ที่ล็อกอินอยู่ (ไม่ใช่ Task Scheduler session แยก)
 6. ถ้ายังไม่กลับ ลองเพิ่ม `timing.youtube_activation_attempts` เป็น `8`
+
+## แก้ปัญหา: กลับ YouTube แล้วจอดำ
+
+1. ค่าเริ่มต้น `youtube_cursor.wake_display_after_restore: true` จะ **RedrawWindow** และเลื่อนเมาส์ไปบริเวณวิดีโอ (ไม่คลิก)
+2. การสลับกลับ YouTube ใช้โหมด **gentle** (ไม่ `SwitchToThisWindow` / ไม่ minimize หน้าต่าง foreground ซ้ำ) เพื่อลดจอดำจาก GPU/Hardware acceleration
+3. ถ้ายังดำ ลอง `youtube_cursor.wake_click: true` (อาจหยุดชั่วคราวถ้าคลิกโดนปุ่ม play — ใช้เมื่อจำเป็น)

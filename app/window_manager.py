@@ -118,6 +118,7 @@ class WindowManager:
         window: WindowInfo,
         *,
         minimize_blocking_window: bool = False,
+        gentle: bool = False,
     ) -> bool:
         """Bring a window to the foreground without AttachThreadInput (avoids deadlocks)."""
         hwnd = window.handle
@@ -127,11 +128,11 @@ class WindowManager:
 
         try:
             self._allow_set_foreground()
-            if minimize_blocking_window:
+            if minimize_blocking_window and not gentle:
                 self._minimize_foreground_if_different(hwnd)
 
             self._show_window(hwnd)
-            self._force_foreground(hwnd)
+            self._force_foreground(hwnd, gentle=gentle)
             return True
         except Exception as exc:
             logger.error(
@@ -167,6 +168,7 @@ class WindowManager:
         delay_seconds: float = 0.25,
         minimize_blocking_window: bool = False,
         blocking_window: WindowInfo | None = None,
+        gentle: bool = False,
     ) -> bool:
         """Activate a window and retry until it becomes foreground or attempts are exhausted."""
         attempt_count = max(1, int(attempts))
@@ -186,6 +188,7 @@ class WindowManager:
             if self.activate_window(
                 window,
                 minimize_blocking_window=minimize_blocking_window,
+                gentle=gentle,
             ) and self.is_foreground_window(window):
                 logger.info("Window '%s' is foreground after attempt %s", window.title, attempt)
                 return True
@@ -247,6 +250,27 @@ class WindowManager:
         if not self._user32.SetCursorPos(int(x), int(y)):
             raise OSError(f"SetCursorPos failed for x={x}, y={y}")
 
+    def click_screen_point(self, x: int, y: int) -> None:
+        """Left-click a screen coordinate using Win32 mouse events."""
+        self.move_cursor_to(x, y)
+        self._user32.mouse_event(0x0002, 0, 0, 0, 0)  # LEFTDOWN
+        self._user32.mouse_event(0x0004, 0, 0, 0, 0)  # LEFTUP
+
+    def redraw_window(self, window: WindowInfo) -> None:
+        """Ask Windows to repaint a window (helps GPU video layers after focus changes)."""
+        if not self.is_window_handle_valid(window.handle):
+            return
+
+        redraw_flags = (
+            self._win32con.RDW_INVALIDATE
+            | self._win32con.RDW_UPDATENOW
+            | self._win32con.RDW_ALLCHILDREN
+        )
+        try:
+            self._win32gui.RedrawWindow(window.handle, None, None, redraw_flags)
+        except Exception as exc:
+            logger.debug("RedrawWindow failed for '%s': %s", window.title, exc)
+
     def _show_window(self, hwnd: int) -> None:
         if self._win32gui.IsIconic(hwnd):
             self._win32gui.ShowWindow(hwnd, self._win32con.SW_RESTORE)
@@ -264,11 +288,15 @@ class WindowManager:
         except Exception as exc:
             logger.debug("Could not minimize foreground window: %s", exc)
 
-    def _force_foreground(self, hwnd: int) -> None:
-        """Apply common Win32 focus workarounds without AttachThreadInput."""
+    def _force_foreground(self, hwnd: int, *, gentle: bool = False) -> None:
+        """Apply Win32 focus workarounds without AttachThreadInput."""
+        self._win32gui.BringWindowToTop(hwnd)
+        if gentle:
+            self._win32gui.SetForegroundWindow(hwnd)
+            return
+
         self._user32.keybd_event(VK_MENU, 0, 0, 0)
         try:
-            self._win32gui.BringWindowToTop(hwnd)
             self._win32gui.SetForegroundWindow(hwnd)
             self._user32.SwitchToThisWindow(hwnd, True)
         finally:

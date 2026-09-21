@@ -9,7 +9,7 @@ from typing import Any
 
 from app.exceptions import IdleDetectionError, RecoverableAutomationError
 from app.idle_monitor import IdleAutomationState, IdleMonitor
-from app.mouse_position import random_point_in_rectangle
+from app.mouse_position import center_point_in_rectangle, random_point_in_rectangle
 from app.window_manager import WindowInfo, WindowManager
 
 logger = logging.getLogger("youtube_teams_automation")
@@ -265,8 +265,9 @@ class AutomationEngine:
             target_window,
             attempts=attempts,
             delay_seconds=retry_delay,
-            minimize_blocking_window=True,
+            minimize_blocking_window=False,
             blocking_window=blocking_window,
+            gentle=True,
         )
         if not activated:
             logger.warning(
@@ -280,7 +281,49 @@ class AutomationEngine:
         if settle_delay > 0:
             self._interruptible_sleep(settle_delay)
 
+        self._wake_youtube_display(target_window)
         self._reposition_mouse_on_youtube(target_window)
+
+    def _wake_youtube_display(self, youtube_window: WindowInfo) -> None:
+        """Repaint and nudge the browser so YouTube video does not stay black after restore."""
+        cursor_config = self._config.get("youtube_cursor") or {}
+        if not cursor_config.get("wake_display_after_restore", True):
+            return
+
+        self._window_manager.redraw_window(youtube_window)
+
+        try:
+            rect = self._window_manager.get_window_rect(youtube_window)
+        except RecoverableAutomationError as exc:
+            logger.warning("Skipping YouTube display wake: %s", exc)
+            return
+
+        vertical_ratio = float(cursor_config.get("wake_vertical_ratio", 0.58))
+        wake_x, wake_y = center_point_in_rectangle(
+            rect,
+            vertical_ratio=vertical_ratio,
+        )
+
+        try:
+            self._window_manager.move_cursor_to(wake_x, wake_y)
+        except Exception as exc:
+            logger.warning("YouTube display wake (mouse move) failed: %s", exc)
+            return
+
+        if cursor_config.get("wake_click", False):
+            try:
+                self._window_manager.click_screen_point(wake_x, wake_y)
+            except Exception as exc:
+                logger.warning("YouTube display wake (click) failed: %s", exc)
+                return
+
+        logger.info(
+            "YouTube display wake at x=%s, y=%s (redraw=%s, click=%s)",
+            wake_x,
+            wake_y,
+            True,
+            bool(cursor_config.get("wake_click", False)),
+        )
 
     def _reposition_mouse_on_youtube(self, youtube_window: WindowInfo) -> None:
         """Move the cursor to a random point inside the YouTube window (optional)."""
