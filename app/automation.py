@@ -9,7 +9,8 @@ from typing import Any
 
 from app.exceptions import IdleDetectionError, RecoverableAutomationError
 from app.idle_monitor import IdleAutomationState, IdleMonitor
-from app.window_manager import WindowManager
+from app.mouse_position import random_point_in_rectangle
+from app.window_manager import WindowInfo, WindowManager
 
 logger = logging.getLogger("youtube_teams_automation")
 
@@ -222,6 +223,50 @@ class AutomationEngine:
         logger.info("Switching back to YouTube: '%s'", youtube_window.title)
         if not self._window_manager.activate_window(youtube_window):
             logger.warning("YouTube window could not be activated.")
+            return
+
+        self._reposition_mouse_on_youtube(youtube_window)
+
+    def _reposition_mouse_on_youtube(self, youtube_window: WindowInfo) -> None:
+        """Move the cursor to a random point inside the YouTube window (optional)."""
+        cursor_config = self._config.get("youtube_cursor") or {}
+        if not cursor_config.get("enabled", True):
+            return
+
+        margin_pixels = int(cursor_config.get("margin_pixels", 80))
+
+        try:
+            rect = self._window_manager.get_window_rect(youtube_window)
+        except RecoverableAutomationError as exc:
+            logger.warning("Skipping YouTube cursor reposition: %s", exc)
+            return
+
+        point = random_point_in_rectangle(rect, margin_pixels)
+        if point is None:
+            logger.warning(
+                "YouTube window is too small for cursor reposition "
+                "(margin_pixels=%s).",
+                margin_pixels,
+            )
+            return
+
+        move_x, move_y = point
+        try:
+            import pyautogui
+
+            pyautogui.FAILSAFE = True
+            pyautogui.PAUSE = 0
+            pyautogui.moveTo(move_x, move_y)
+        except Exception as exc:
+            logger.warning("YouTube cursor reposition failed: %s", exc)
+            return
+
+        logger.info(
+            "Mouse repositioned on YouTube at x=%s, y=%s (margin=%s)",
+            move_x,
+            move_y,
+            margin_pixels,
+        )
 
     @staticmethod
     def _interruptible_sleep(seconds: float) -> None:

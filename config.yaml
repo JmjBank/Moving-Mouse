@@ -28,6 +28,10 @@ teams_click:
   button: "left"
   clicks: 1
 
+youtube_cursor:
+  enabled: true
+  margin_pixels: 80
+
 logging:
   level: "INFO"
   log_to_console: true

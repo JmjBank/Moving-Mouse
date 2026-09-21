@@ -39,6 +39,10 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "button": "left",
         "clicks": 1,
     },
+    "youtube_cursor": {
+        "enabled": True,
+        "margin_pixels": 80,
+    },
     "logging": {
         "level": "INFO",
         "log_to_console": True,
@@ -188,3 +192,22 @@ def validate_config(config: dict[str, Any]) -> None:
         raise ConfigurationError(
             "Invalid configuration: teams_click.button must be left, right, or middle"
         )
+
+    youtube_cursor = config.get("youtube_cursor")
+    if youtube_cursor is not None:
+        if not isinstance(youtube_cursor, dict):
+            raise ConfigurationError(
+                "Invalid configuration: youtube_cursor must be an object"
+            )
+
+        cursor_enabled = youtube_cursor.get("enabled")
+        if not isinstance(cursor_enabled, bool):
+            raise ConfigurationError(
+                "Invalid configuration: youtube_cursor.enabled must be a boolean"
+            )
+
+        margin_pixels = youtube_cursor.get("margin_pixels")
+        if not isinstance(margin_pixels, int) or margin_pixels < 0:
+            raise ConfigurationError(
+                "Invalid configuration: youtube_cursor.margin_pixels must be an integer >= 0"
+            )
