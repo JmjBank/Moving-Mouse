@@ -94,6 +94,8 @@ flowchart TD
 | `activity_monitor.idle_threshold_seconds` | วินาที idle ก่อนเริ่ม cycle |
 | `activity_monitor.poll_interval_seconds` | ความถี่ตรวจ idle |
 | `timing.teams_activation_delay_seconds` | รอหลังเปิด Teams |
+| `timing.teams_activation_attempts` | จำนวนครั้งที่ลอง activate Teams |
+| `timing.teams_activation_retry_delay_seconds` | หน่วงระหว่าง retry เปิด Teams |
 | `timing.after_click_delay_seconds` | รอหลังคลิกก่อนกลับ YouTube |
 | `timing.youtube_activation_attempts` | จำนวนครั้งที่ลองสลับกลับ YouTube (สูงสุด 3 ในโค้ด) |
 | `timing.youtube_activation_retry_delay_seconds` | หน่วงระหว่างแต่ละครั้งที่ลอง activate YouTube |

@@ -9,6 +9,8 @@ activity_monitor:
 
 timing:
   teams_activation_delay_seconds: 2
+  teams_activation_attempts: 3
+  teams_activation_retry_delay_seconds: 0.3
   after_click_delay_seconds: 1
   startup_delay_seconds: 3
   youtube_activation_attempts: 2
