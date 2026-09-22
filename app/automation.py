@@ -128,7 +128,13 @@ class AutomationEngine:
                 "Restore after Teams may fail; check windows.youtube.title_keywords."
             )
 
-        teams_window = self._window_manager.find_teams_window(teams_config)
+        exclude_youtube_handle = (
+            youtube_window.handle if youtube_window is not None else None
+        )
+        teams_window = self._window_manager.resolve_teams_window(
+            teams_config,
+            exclude_handle=exclude_youtube_handle,
+        )
         if teams_window is None:
             logger.warning(
                 "Microsoft Teams window not found. Current automation cycle skipped."

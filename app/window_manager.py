@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ctypes
 import logging
+import os
 import sys
 import time
 from ctypes import wintypes
@@ -50,21 +51,90 @@ class WindowManager:
         self._win32process = win32process
         self._user32 = ctypes.windll.user32
 
-    def find_teams_window(self, teams_config: dict[str, Any]) -> WindowInfo | None:
+    def resolve_teams_window(
+        self,
+        teams_config: dict[str, Any],
+        *,
+        exclude_handle: int | None = None,
+    ) -> WindowInfo | None:
+        """Find Teams, optionally launch the desktop app, then search again."""
+        window = self.find_teams_window(
+            teams_config,
+            exclude_handle=exclude_handle,
+        )
+        if window is not None:
+            return window
+
+        if not bool(teams_config.get("launch_if_not_found", True)):
+            self._log_teams_not_found_guidance(teams_config, exclude_handle)
+            return None
+
+        launch_uri = str(teams_config.get("launch_uri", "msteams:"))
+        wait_seconds = float(teams_config.get("launch_wait_seconds", 6.0))
+        logger.info(
+            "Microsoft Teams not visible; launching desktop app via '%s'",
+            launch_uri,
+        )
+        try:
+            os.startfile(launch_uri)
+        except Exception as exc:
+            logger.warning("Failed to launch Microsoft Teams (%s): %s", launch_uri, exc)
+            self._log_teams_not_found_guidance(teams_config, exclude_handle)
+            return None
+
+        if wait_seconds > 0:
+            time.sleep(min(wait_seconds, 15.0))
+
+        window = self.find_teams_window(
+            teams_config,
+            exclude_handle=exclude_handle,
+        )
+        if window is not None:
+            return window
+
+        self._log_teams_not_found_guidance(teams_config, exclude_handle)
+        return None
+
+    def find_teams_window(
+        self,
+        teams_config: dict[str, Any],
+        *,
+        exclude_handle: int | None = None,
+    ) -> WindowInfo | None:
         """Locate the main Microsoft Teams window by title and/or process name."""
         keywords = teams_config.get("title_keywords") or ["Microsoft Teams", "Teams"]
         process_names = teams_config.get("process_names") or ["ms-teams.exe", "Teams.exe"]
+        browser_process_names = teams_config.get("browser_process_names") or [
+            "chrome.exe",
+            "msedge.exe",
+        ]
         min_width = int(teams_config.get("min_window_width", 100))
         min_height = int(teams_config.get("min_window_height", 80))
         include_minimized = bool(teams_config.get("include_minimized", True))
 
-        window = self.find_window_by_keywords(
+        window = self._find_teams_by_title(
             keywords,
             min_width=min_width,
             min_height=min_height,
             include_minimized=include_minimized,
+            exclude_handle=exclude_handle,
         )
         if window is not None:
+            return window
+
+        window = self._find_teams_in_browser_windows(
+            keywords,
+            browser_process_names,
+            min_width=min_width,
+            min_height=min_height,
+            include_minimized=include_minimized,
+            exclude_handle=exclude_handle,
+        )
+        if window is not None:
+            logger.info(
+                "Microsoft Teams window resolved in browser: '%s'",
+                window.title,
+            )
             return window
 
         window = self.find_window_by_process_names(
@@ -73,6 +143,7 @@ class WindowManager:
             min_width=min_width,
             min_height=min_height,
             include_minimized=include_minimized,
+            exclude_handle=exclude_handle,
         )
         if window is not None:
             logger.info(
@@ -81,11 +152,99 @@ class WindowManager:
             )
             return window
 
-        logger.warning(
-            "Microsoft Teams window not found. Open the Teams desktop app and verify "
-            "windows.teams.title_keywords / windows.teams.process_names in config.yaml."
+        window = self.find_window_by_process_names(
+            process_names,
+            title_keywords=keywords,
+            min_width=0,
+            min_height=0,
+            include_minimized=include_minimized,
+            exclude_handle=exclude_handle,
         )
+        if window is not None:
+            logger.info(
+                "Microsoft Teams window resolved by process (relaxed size): '%s'",
+                window.title,
+            )
+            return window
+
         return None
+
+    def _find_teams_by_title(
+        self,
+        keywords: Sequence[str],
+        *,
+        min_width: int,
+        min_height: int,
+        include_minimized: bool,
+        exclude_handle: int | None,
+    ) -> WindowInfo | None:
+        foreground = self._foreground_teams_window(keywords)
+        if foreground is not None and foreground.handle != exclude_handle:
+            return foreground
+
+        return self.find_window_by_keywords(
+            keywords,
+            min_width=min_width,
+            min_height=min_height,
+            include_minimized=include_minimized,
+            exclude_handle=exclude_handle,
+        )
+
+    def _foreground_teams_window(self, keywords: Sequence[str]) -> WindowInfo | None:
+        try:
+            foreground_hwnd = self._win32gui.GetForegroundWindow()
+        except Exception:
+            return None
+
+        if not foreground_hwnd or not self.is_window_handle_valid(foreground_hwnd):
+            return None
+
+        root = self._root_window_handle(foreground_hwnd)
+        target_hwnd = root or foreground_hwnd
+        title = self._win32gui.GetWindowText(target_hwnd) or ""
+        if score_title_for_keywords(title, keywords) <= 0:
+            return None
+
+        return WindowInfo(handle=target_hwnd, title=title)
+
+    def _find_teams_in_browser_windows(
+        self,
+        keywords: Sequence[str],
+        browser_process_names: Sequence[str],
+        *,
+        min_width: int,
+        min_height: int,
+        include_minimized: bool,
+        exclude_handle: int | None,
+    ) -> WindowInfo | None:
+        return self.find_window_by_process_names(
+            browser_process_names,
+            title_keywords=keywords,
+            min_width=min_width,
+            min_height=min_height,
+            include_minimized=include_minimized,
+            exclude_handle=exclude_handle,
+            require_title_keyword=True,
+        )
+
+    def _log_teams_not_found_guidance(
+        self,
+        teams_config: dict[str, Any],
+        exclude_handle: int | None,
+    ) -> None:
+        process_names = teams_config.get("process_names") or ["ms-teams.exe"]
+        self._log_teams_discovery_hints(process_names)
+
+        if exclude_handle is not None:
+            logger.warning(
+                "If Microsoft Teams is only a tab in the same browser window as YouTube, "
+                "automation cannot switch to it. Open the Teams desktop app, or use "
+                "'Pop out to a new window' in Teams on the web."
+            )
+        logger.warning(
+            "Microsoft Teams window not found. Verify windows.teams in config.yaml and "
+            "that the Teams desktop app is running."
+        )
 
     def find_window_by_keywords(
         self,
@@ -94,6 +253,7 @@ class WindowManager:
         min_width: int = 0,
         min_height: int = 0,
         include_minimized: bool = False,
+        exclude_handle: int | None = None,
     ) -> WindowInfo | None:
         """Find the best window whose title contains any keyword (case-insensitive)."""
         if not keywords:
@@ -103,6 +263,9 @@ class WindowManager:
         scored_matches: list[tuple[int, WindowInfo]] = []
 
         def callback(hwnd: int, _: Any) -> bool:
+            root_hwnd = self._root_window_handle(hwnd)
+            if exclude_handle is not None and root_hwnd == exclude_handle:
+                return True
             if not self._is_top_level_window(hwnd):
                 return True
             if not self._is_window_candidate(hwnd, include_minimized):
@@ -131,6 +294,8 @@ class WindowManager:
         min_width: int = 0,
         min_height: int = 0,
         include_minimized: bool = False,
+        exclude_handle: int | None = None,
+        require_title_keyword: bool = False,
     ) -> WindowInfo | None:
         """Find the largest top-level window owned by a matching process."""
         if not process_names:
@@ -142,7 +307,8 @@ class WindowManager:
 
         def callback(hwnd: int, _: Any) -> bool:
             nonlocal best
-            if not self._is_top_level_window(hwnd):
+            root_hwnd = self._root_window_handle(hwnd)
+            if exclude_handle is not None and root_hwnd == exclude_handle:
                 return True
             if not self._is_window_candidate(hwnd, include_minimized):
                 return True
@@ -157,11 +323,19 @@ class WindowManager:
             ):
                 return True
 
-            title = self._win32gui.GetWindowText(hwnd) or f"Teams ({executable_name})"
+            target_hwnd = root_hwnd if root_hwnd else hwnd
+            title = (
+                self._win32gui.GetWindowText(target_hwnd)
+                or self._win32gui.GetWindowText(hwnd)
+                or f"Teams ({executable_name})"
+            )
             keyword_score = score_title_for_keywords(title, keyword_list)
-            area = self._window_area(hwnd)
-            ranking = (keyword_score, area, int(hwnd))
-            candidate = WindowInfo(handle=hwnd, title=title)
+            if require_title_keyword and keyword_score <= 0:
+                return True
+
+            area = self._window_area(target_hwnd)
+            ranking = (keyword_score, area, int(target_hwnd))
+            candidate = WindowInfo(handle=target_hwnd, title=title)
             if best is None or ranking > best[0]:
                 best = (ranking, candidate)
             return True
@@ -380,8 +554,47 @@ class WindowManager:
     def _is_top_level_window(self, hwnd: int) -> bool:
         if not self.is_window_handle_valid(hwnd):
             return False
-        owner = self._win32gui.GetWindow(hwnd, self._win32con.GW_OWNER)
-        return owner == 0
+        root = self._root_window_handle(hwnd)
+        return root == hwnd
+
+    def _log_teams_discovery_hints(self, process_names: Sequence[str]) -> None:
+        hints: list[str] = []
+        teams_process_seen = False
+
+        def callback(hwnd: int, _: Any) -> bool:
+            nonlocal teams_process_seen
+            process_id = self._window_process_id(hwnd)
+            executable_name = self._process_executable_basename(process_id) or "?"
+            title = self._win32gui.GetWindowText(hwnd) or "<no title>"
+            title_lower = title.lower()
+
+            if executable_matches_process_names(executable_name, process_names):
+                teams_process_seen = True
+
+            if (
+                executable_matches_process_names(executable_name, process_names)
+                or "team" in title_lower
+            ):
+                hints.append(
+                    f"hwnd={hwnd} exe={executable_name} title={title[:100]}"
+                )
+            return True
+
+        try:
+            self._win32gui.EnumWindows(callback, None)
+        except Exception:
+            return
+
+        if hints:
+            logger.warning(
+                "Teams discovery hints (first matches): %s",
+                " | ".join(hints[:6]),
+            )
+        elif not teams_process_seen:
+            logger.warning(
+                "No running process matched %s. Install/open Microsoft Teams desktop.",
+                list(process_names),
+            )
 
     def _is_window_candidate(self, hwnd: int, include_minimized: bool) -> bool:
         if self._win32gui.IsWindowVisible(hwnd):
