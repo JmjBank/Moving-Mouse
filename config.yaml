@@ -30,6 +30,12 @@ windows:
     title_keywords:
       - "Microsoft Teams"
       - "Teams"
+    process_names:
+      - "ms-teams.exe"
+      - "Teams.exe"
+    min_window_width: 100
+    min_window_height: 80
+    include_minimized: true
 
 teams_click:
   x: 850

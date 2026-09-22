@@ -116,7 +116,7 @@ class AutomationEngine:
         """Execute a single YouTube → Teams → click → YouTube cycle."""
         logger.info("Automation cycle #%s started", cycle_number)
 
-        teams_keywords = self._config["windows"]["teams"]["title_keywords"]
+        teams_config = self._config["windows"]["teams"]
         youtube_keywords = self._config["windows"]["youtube"]["title_keywords"]
         timing = self._config["timing"]
         teams_click = self._config["teams_click"]
@@ -128,11 +128,7 @@ class AutomationEngine:
                 "Restore after Teams may fail; check windows.youtube.title_keywords."
             )
 
-        teams_window = self._window_manager.find_window_by_keywords(
-            teams_keywords,
-            min_width=300,
-            min_height=200,
-        )
+        teams_window = self._window_manager.find_teams_window(teams_config)
         if teams_window is None:
             logger.warning(
                 "Microsoft Teams window not found. Current automation cycle skipped."
