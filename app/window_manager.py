@@ -17,6 +17,9 @@ logger = logging.getLogger("youtube_teams_automation")
 
 IS_WINDOWS = sys.platform.startswith("win")
 
+VK_MENU = 0x12
+KEYEVENTF_KEYUP = 0x0002
+
 
 @dataclass(frozen=True)
 class WindowInfo:
@@ -46,7 +49,13 @@ class WindowManager:
         self._win32process = win32process
         self._user32 = ctypes.windll.user32
 
-    def find_window_by_keywords(self, keywords: Sequence[str]) -> WindowInfo | None:
+    def find_window_by_keywords(
+        self,
+        keywords: Sequence[str],
+        *,
+        min_width: int = 0,
+        min_height: int = 0,
+    ) -> WindowInfo | None:
         """Find the best visible window whose title contains any keyword (case-insensitive)."""
         if not keywords:
             return None
@@ -60,6 +69,9 @@ class WindowManager:
 
             title = self._win32gui.GetWindowText(hwnd)
             if not title:
+                return True
+
+            if not self._window_meets_min_size(hwnd, min_width, min_height):
                 return True
 
             score = score_title_for_keywords(title, normalized_keywords)
@@ -115,16 +127,17 @@ class WindowManager:
             self._allow_set_foreground()
             self._show_window(hwnd)
             self._win32gui.BringWindowToTop(hwnd)
-            self._win32gui.SetForegroundWindow(hwnd)
-            return True
         except Exception as exc:
             logger.error(
-                "Failed to activate window '%s' (handle=%s): %s",
+                "Failed to show window '%s' (handle=%s): %s",
                 window.title,
                 hwnd,
                 exc,
             )
             return False
+
+        self._set_foreground_safe(hwnd, window.title)
+        return True
 
     def minimize_window(self, window: WindowInfo) -> bool:
         """Minimize a top-level window."""
@@ -248,6 +261,54 @@ class WindowManager:
             self._win32gui.ShowWindow(hwnd, self._win32con.SW_RESTORE)
         else:
             self._win32gui.ShowWindow(hwnd, self._win32con.SW_SHOW)
+
+    def _set_foreground_safe(self, hwnd: int, title: str) -> None:
+        """Set foreground; Windows often raises here — use a short Alt fallback."""
+        try:
+            self._win32gui.SetForegroundWindow(hwnd)
+            return
+        except Exception as exc:
+            logger.warning(
+                "SetForegroundWindow failed for '%s' (handle=%s): %s",
+                title,
+                hwnd,
+                exc,
+            )
+
+        self._user32.keybd_event(VK_MENU, 0, 0, 0)
+        try:
+            self._win32gui.SetForegroundWindow(hwnd)
+        except Exception as exc:
+            logger.warning(
+                "SetForegroundWindow fallback failed for '%s' (handle=%s): %s",
+                title,
+                hwnd,
+                exc,
+            )
+        finally:
+            self._user32.keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0)
+
+    def _window_meets_min_size(
+        self,
+        hwnd: int,
+        min_width: int,
+        min_height: int,
+    ) -> bool:
+        if min_width <= 0 and min_height <= 0:
+            return True
+
+        try:
+            left, top, right, bottom = self._win32gui.GetWindowRect(hwnd)
+            width = int(right) - int(left)
+            height = int(bottom) - int(top)
+        except Exception:
+            return False
+
+        if min_width > 0 and width < min_width:
+            return False
+        if min_height > 0 and height < min_height:
+            return False
+        return True
 
     def _allow_set_foreground(self) -> None:
         try:

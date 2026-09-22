@@ -128,7 +128,11 @@ class AutomationEngine:
                 "Restore after Teams may fail; check windows.youtube.title_keywords."
             )
 
-        teams_window = self._window_manager.find_window_by_keywords(teams_keywords)
+        teams_window = self._window_manager.find_window_by_keywords(
+            teams_keywords,
+            min_width=300,
+            min_height=200,
+        )
         if teams_window is None:
             logger.warning(
                 "Microsoft Teams window not found. Current automation cycle skipped."
@@ -141,8 +145,21 @@ class AutomationEngine:
 
         teams_session_active = False
         try:
-            if not self._window_manager.activate_window(teams_window):
-                logger.error("Unable to activate Microsoft Teams. Click cancelled.")
+            teams_attempts = int(timing.get("teams_activation_attempts", 3))
+            teams_retry_delay = float(
+                timing.get("teams_activation_retry_delay_seconds", 0.3)
+            )
+            teams_activated = self._window_manager.activate_window_with_retries(
+                teams_window,
+                attempts=teams_attempts,
+                delay_seconds=teams_retry_delay,
+            )
+            if not teams_activated:
+                logger.error(
+                    "Unable to activate Microsoft Teams. Click cancelled. "
+                    "Current foreground: '%s'",
+                    self._window_manager.get_foreground_title(),
+                )
                 return CycleResult.SKIPPED
 
             teams_session_active = True
