@@ -42,6 +42,10 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "min_window_width": 100,
             "min_window_height": 80,
             "include_minimized": True,
+            "browser_process_names": ["chrome.exe", "msedge.exe"],
+            "launch_if_not_found": True,
+            "launch_uri": "msteams:",
+            "launch_wait_seconds": 6.0,
         },
     },
     "teams_click": {
@@ -229,6 +233,29 @@ def validate_config(config: dict[str, Any]) -> None:
     ):
         raise ConfigurationError(
             "Invalid configuration: windows.teams.include_minimized must be a boolean"
+        )
+
+    teams_browser_processes = teams.get("browser_process_names")
+    if teams_browser_processes is not None:
+        if not isinstance(teams_browser_processes, list) or not teams_browser_processes:
+            raise ConfigurationError(
+                "Invalid configuration: windows.teams.browser_process_names must not be empty"
+            )
+
+    teams_launch_if_not_found = teams.get("launch_if_not_found")
+    if teams_launch_if_not_found is not None and not isinstance(
+        teams_launch_if_not_found, bool
+    ):
+        raise ConfigurationError(
+            "Invalid configuration: windows.teams.launch_if_not_found must be a boolean"
+        )
+
+    teams_launch_wait = teams.get("launch_wait_seconds")
+    if teams_launch_wait is not None and (
+        not isinstance(teams_launch_wait, (int, float)) or float(teams_launch_wait) < 0
+    ):
+        raise ConfigurationError(
+            "Invalid configuration: windows.teams.launch_wait_seconds must be >= 0"
         )
 
     teams_click = config.get("teams_click")

@@ -36,6 +36,12 @@ windows:
     min_window_width: 100
     min_window_height: 80
     include_minimized: true
+    browser_process_names:
+      - "chrome.exe"
+      - "msedge.exe"
+    launch_if_not_found: true
+    launch_uri: "msteams:"
+    launch_wait_seconds: 6.0
 
 teams_click:
   x: 850

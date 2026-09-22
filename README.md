@@ -104,6 +104,10 @@ flowchart TD
 | `windows.youtube.restore_minimize_teams` | ย่อ Teams ก่อนกลับ (ค่าเริ่มต้น `false`) |
 | `windows.teams.process_names` | หา Teams จากชื่อ process (`ms-teams.exe`) เมื่อชื่อหน้าต่างไม่ตรง keyword |
 | `windows.teams.include_minimized` | รวมหน้าต่าง Teams ที่ minimize ไว้ใน taskbar |
+| `windows.teams.browser_process_names` | หา Teams ในหน้าต่าง Chrome/Edge แยก (ชื่อแท็บต้องมี keyword) |
+| `windows.teams.launch_if_not_found` | เปิดแอป Teams (`msteams:`) ถ้ายังไม่เจอหน้าต่าง |
+
+**สำคัญ:** ถ้า Teams เป็นแท็บใน **หน้าต่าง Chrome เดียวกับ YouTube** (ชื่อหน้าต่างเป็น YouTube) โปรแกรมจะหา Teams ไม่ได้ — ใช้แอป Teams Desktop หรือ Pop out Teams เป็นหน้าต่างใหม่
 | `teams_click.x` / `y` | พิกัดคลิกบนหน้าจอ |
 | `youtube_cursor.enabled` | เปิด/ปิดการสุ่มตำแหน่งเมาส์หลังกลับ YouTube |
 | `youtube_cursor.margin_pixels` | ระยะห่างจากขอบหน้าต่าง YouTube (พิกเซล) |
