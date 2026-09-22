@@ -38,6 +38,10 @@ DEFAULT_CONFIG: dict[str, Any] = {
         },
         "teams": {
             "title_keywords": ["Microsoft Teams", "Teams"],
+            "process_names": ["ms-teams.exe", "Teams.exe"],
+            "min_window_width": 100,
+            "min_window_height": 80,
+            "include_minimized": True,
         },
     },
     "teams_click": {
@@ -194,6 +198,37 @@ def validate_config(config: dict[str, Any]) -> None:
     if not isinstance(teams_keywords, list) or not teams_keywords:
         raise ConfigurationError(
             "Invalid configuration: windows.teams.title_keywords must not be empty"
+        )
+
+    teams_process_names = teams.get("process_names")
+    if teams_process_names is not None:
+        if not isinstance(teams_process_names, list) or not teams_process_names:
+            raise ConfigurationError(
+                "Invalid configuration: windows.teams.process_names must not be empty"
+            )
+
+    teams_min_width = teams.get("min_window_width")
+    if teams_min_width is not None and (
+        not isinstance(teams_min_width, int) or teams_min_width < 0
+    ):
+        raise ConfigurationError(
+            "Invalid configuration: windows.teams.min_window_width must be an integer >= 0"
+        )
+
+    teams_min_height = teams.get("min_window_height")
+    if teams_min_height is not None and (
+        not isinstance(teams_min_height, int) or teams_min_height < 0
+    ):
+        raise ConfigurationError(
+            "Invalid configuration: windows.teams.min_window_height must be an integer >= 0"
+        )
+
+    teams_include_minimized = teams.get("include_minimized")
+    if teams_include_minimized is not None and not isinstance(
+        teams_include_minimized, bool
+    ):
+        raise ConfigurationError(
+            "Invalid configuration: windows.teams.include_minimized must be a boolean"
         )
 
     teams_click = config.get("teams_click")

@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Any, Sequence
 
 from app.exceptions import PlatformNotSupportedError, RecoverableAutomationError
+from app.window_process import executable_matches_process_names
 from app.window_selection import choose_best_scored_item, score_title_for_keywords
 
 logger = logging.getLogger("youtube_teams_automation")
@@ -49,14 +50,52 @@ class WindowManager:
         self._win32process = win32process
         self._user32 = ctypes.windll.user32
 
+    def find_teams_window(self, teams_config: dict[str, Any]) -> WindowInfo | None:
+        """Locate the main Microsoft Teams window by title and/or process name."""
+        keywords = teams_config.get("title_keywords") or ["Microsoft Teams", "Teams"]
+        process_names = teams_config.get("process_names") or ["ms-teams.exe", "Teams.exe"]
+        min_width = int(teams_config.get("min_window_width", 100))
+        min_height = int(teams_config.get("min_window_height", 80))
+        include_minimized = bool(teams_config.get("include_minimized", True))
+
+        window = self.find_window_by_keywords(
+            keywords,
+            min_width=min_width,
+            min_height=min_height,
+            include_minimized=include_minimized,
+        )
+        if window is not None:
+            return window
+
+        window = self.find_window_by_process_names(
+            process_names,
+            title_keywords=keywords,
+            min_width=min_width,
+            min_height=min_height,
+            include_minimized=include_minimized,
+        )
+        if window is not None:
+            logger.info(
+                "Microsoft Teams window resolved by process name: '%s'",
+                window.title,
+            )
+            return window
+
+        logger.warning(
+            "Microsoft Teams window not found. Open the Teams desktop app and verify "
+            "windows.teams.title_keywords / windows.teams.process_names in config.yaml."
+        )
+        return None
+
     def find_window_by_keywords(
         self,
         keywords: Sequence[str],
         *,
         min_width: int = 0,
         min_height: int = 0,
+        include_minimized: bool = False,
     ) -> WindowInfo | None:
-        """Find the best visible window whose title contains any keyword (case-insensitive)."""
+        """Find the best window whose title contains any keyword (case-insensitive)."""
         if not keywords:
             return None
 
@@ -64,7 +103,9 @@ class WindowManager:
         scored_matches: list[tuple[int, WindowInfo]] = []
 
         def callback(hwnd: int, _: Any) -> bool:
-            if not self._win32gui.IsWindowVisible(hwnd):
+            if not self._is_top_level_window(hwnd):
+                return True
+            if not self._is_window_candidate(hwnd, include_minimized):
                 return True
 
             title = self._win32gui.GetWindowText(hwnd)
@@ -79,14 +120,54 @@ class WindowManager:
                 scored_matches.append((score, WindowInfo(handle=hwnd, title=title)))
             return True
 
-        try:
-            self._win32gui.EnumWindows(callback, None)
-        except Exception as exc:
-            raise RecoverableAutomationError(
-                f"Window enumeration failed: {exc}"
-            ) from exc
-
+        self._enum_windows(callback)
         return choose_best_scored_item(scored_matches)
+
+    def find_window_by_process_names(
+        self,
+        process_names: Sequence[str],
+        *,
+        title_keywords: Sequence[str] = (),
+        min_width: int = 0,
+        min_height: int = 0,
+        include_minimized: bool = False,
+    ) -> WindowInfo | None:
+        """Find the largest top-level window owned by a matching process."""
+        if not process_names:
+            return None
+
+        normalized_process_names = [name for name in process_names if name]
+        keyword_list = [keyword for keyword in title_keywords if keyword]
+        best: tuple[tuple[int, int, int], WindowInfo] | None = None
+
+        def callback(hwnd: int, _: Any) -> bool:
+            nonlocal best
+            if not self._is_top_level_window(hwnd):
+                return True
+            if not self._is_window_candidate(hwnd, include_minimized):
+                return True
+            if not self._window_meets_min_size(hwnd, min_width, min_height):
+                return True
+
+            process_id = self._window_process_id(hwnd)
+            executable_name = self._process_executable_basename(process_id)
+            if not executable_name or not executable_matches_process_names(
+                executable_name,
+                normalized_process_names,
+            ):
+                return True
+
+            title = self._win32gui.GetWindowText(hwnd) or f"Teams ({executable_name})"
+            keyword_score = score_title_for_keywords(title, keyword_list)
+            area = self._window_area(hwnd)
+            ranking = (keyword_score, area, int(hwnd))
+            candidate = WindowInfo(handle=hwnd, title=title)
+            if best is None or ranking > best[0]:
+                best = (ranking, candidate)
+            return True
+
+        self._enum_windows(callback)
+        return best[1] if best is not None else None
 
     def resolve_youtube_window(self, keywords: Sequence[str]) -> WindowInfo | None:
         """
@@ -287,6 +368,61 @@ class WindowManager:
             )
         finally:
             self._user32.keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0)
+
+    def _enum_windows(self, callback: Any) -> None:
+        try:
+            self._win32gui.EnumWindows(callback, None)
+        except Exception as exc:
+            raise RecoverableAutomationError(
+                f"Window enumeration failed: {exc}"
+            ) from exc
+
+    def _is_top_level_window(self, hwnd: int) -> bool:
+        if not self.is_window_handle_valid(hwnd):
+            return False
+        owner = self._win32gui.GetWindow(hwnd, self._win32con.GW_OWNER)
+        return owner == 0
+
+    def _is_window_candidate(self, hwnd: int, include_minimized: bool) -> bool:
+        if self._win32gui.IsWindowVisible(hwnd):
+            return True
+        return include_minimized and bool(self._win32gui.IsIconic(hwnd))
+
+    def _window_area(self, hwnd: int) -> int:
+        try:
+            left, top, right, bottom = self._win32gui.GetWindowRect(hwnd)
+            return max(0, int(right) - int(left)) * max(0, int(bottom) - int(top))
+        except Exception:
+            return 0
+
+    def _process_executable_basename(self, process_id: int) -> str | None:
+        if process_id <= 0:
+            return None
+
+        process_handle = ctypes.windll.kernel32.OpenProcess(
+            0x1000,
+            False,
+            int(process_id),
+        )
+        if not process_handle:
+            return None
+
+        try:
+            buffer = ctypes.create_unicode_buffer(260)
+            size = wintypes.DWORD(len(buffer))
+            if ctypes.windll.kernel32.QueryFullProcessImageNameW(
+                process_handle,
+                0,
+                buffer,
+                ctypes.byref(size),
+            ):
+                path = buffer.value
+                if path:
+                    return path.rsplit("\\", 1)[-1]
+        finally:
+            ctypes.windll.kernel32.CloseHandle(process_handle)
+
+        return None
 
     def _window_meets_min_size(
         self,

@@ -102,6 +102,8 @@ flowchart TD
 | `timing.youtube_activation_delay_seconds` | รอสั้นๆ ก่อนย้ายเมาส์ |
 | `timing.youtube_restore_timeout_seconds` | จำกัดเวลา restore ทั้งชุด (กันโปรแกรมค้าง) |
 | `windows.youtube.restore_minimize_teams` | ย่อ Teams ก่อนกลับ (ค่าเริ่มต้น `false`) |
+| `windows.teams.process_names` | หา Teams จากชื่อ process (`ms-teams.exe`) เมื่อชื่อหน้าต่างไม่ตรง keyword |
+| `windows.teams.include_minimized` | รวมหน้าต่าง Teams ที่ minimize ไว้ใน taskbar |
 | `teams_click.x` / `y` | พิกัดคลิกบนหน้าจอ |
 | `youtube_cursor.enabled` | เปิด/ปิดการสุ่มตำแหน่งเมาส์หลังกลับ YouTube |
 | `youtube_cursor.margin_pixels` | ระยะห่างจากขอบหน้าต่าง YouTube (พิกเซล) |
